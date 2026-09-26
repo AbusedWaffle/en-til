@@ -1,7 +1,33 @@
-# Flip 7 online (P2P, PeerJS)
-Statisk side: index.html + game.js (ren spillogik) + vendor/ (peerjs 1.5.5, qrcode-generator 2.0.4, MIT).
-- Unit tests: `node --test test/`
-- E2E: serve mappen på :8080 (`python3 -m http.server 8080`), så
-  `NODE_PATH=/workspace/flip7-dev/node_modules node e2e/e2e.js` (offentlig PeerJS-broker) eller `... --local`
-  (kræver `npx peer --port 9000 --path /myapp`).
-- Lokal broker i appen: `?peerhost=localhost&peerport=9000&peerpath=/myapp[&peersecure=1]` (videregives i join-link/QR).
+# Flip 7 online
+
+**Spil her:** https://abusedwaffle.github.io/flip7/
+
+## Sådan kommer I ind i spillet
+1. **Værten** (én person) åbner linket, skriver sit navn og opretter et spil. Der vises en spilkode på 5 tegn og en QR-kode.
+2. **De andre** scanner QR-koden med kameraet eller åbner linket, skriver spilkoden og deres navn.
+3. Når alle står i lobbyen, vælger værten, hvor mange point der spilles til (200 som standard), og trykker **Start spil**. Man kan være 2 til 8 spillere.
+
+Tip: Tryk på del-knappen i browseren og vælg **Føj til hjemmeskærm**, så ligger spillet som en app på telefonen.
+
+## Det skal I være opmærksomme på
+- **Værtens telefon holder spillet i gang.** Værten skal have spillet åbent og skærmen tændt. Hvis værtens telefon låser eller lukker spillet, går spillet i stå for alle, indtil værten åbner det igen. Så fortsætter det, hvor I slap.
+- **Alle skal have internet.** Det er sikrest, at alle er på samme wifi.
+- **Mister du forbindelsen eller genindlæser siden,** kommer du automatisk tilbage med dine kort. Er du væk, mens det er din tur, kan værten trække eller stoppe for dig.
+- **På iPhone** vibrerer telefonen ikke, når det er din tur, men du får et bip og et stort gult banner.
+
+## Sådan fungerer spillet
+Målet er at være den første, der når 200 point. Hver runde handler om at trække kort uden at få det samme tal to gange.
+
+- **Din tur:** Når det er din tur, står der **Din tur!** øverst. Så trykker du enten **Træk kort** for at få et kort mere eller **Stop** for at gemme dine point for runden. Når det er en andens tur, står der, hvem I venter på.
+- **Bust:** Trækker du et tal, du allerede har, går du bust og får 0 point i runden.
+- **Flip 7:** Får du 7 forskellige tal, slutter runden med det samme for alle, og du får 15 bonuspoint.
+- **Point:** Du får summen af dine talkort. Et **×2**-kort fordobler talkortene, og **plus-kort** (+2 til +10) lægges til bagefter.
+- **Specialkort:**
+  - **Frys:** Du vælger en spiller (også gerne dig selv), som gemmer sine point og er færdig for runden.
+  - **Flip 3:** Du vælger en spiller, som skal trække 3 kort i træk.
+  - **2. chance:** Redder dig én gang fra bust.
+  Når du skal vælge en spiller, kommer der en liste frem på din telefon.
+- **Rundens slutning:** Alle ser, hvor mange point de fik, og værten trykker **Næste runde**.
+- **Vinder:** Når nogen har nået målet, spilles runden færdig, og den med flest point vinder. Er der uafgjort i toppen, spilles én runde mere.
+
+Skærmen viser hele tiden dine kort, dine point i runden, alles kort og stillingen.
