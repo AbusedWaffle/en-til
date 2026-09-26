@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="da"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Flip 7">
+<meta name="theme-color" content="#10192e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Flip 7 online</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;background:#10192e;color:#fff;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+header{display:flex;align-items:center;gap:10px;padding:10px 14px;max-width:560px;margin:auto}
+h1{margin:0;font-size:22px;letter-spacing:1px;flex:1}h1 span{color:#ffcf40}
+.pill{font-size:12px;padding:5px 10px;border-radius:20px;background:#1b2a4a;color:#9fb0d0;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.dot{width:9px;height:9px;border-radius:50%;background:#6b7a99;display:inline-block;flex:none}
+.dot.on{background:#3ddc84}.dot.wait{background:#ffcf40}.dot.off{background:#e0485f}
+main{padding:0 12px calc(110px + env(safe-area-inset-bottom));max-width:560px;margin:auto}
+.card{background:#1b2a4a;border-radius:16px;padding:14px;margin-bottom:12px}
+input,button{font:inherit}
+input[type=text],input[type=number]{width:100%;padding:13px;border-radius:10px;border:0;background:#0d1628;color:#fff;font-size:18px;-webkit-user-select:text;user-select:text}
+#code{text-transform:uppercase;letter-spacing:6px;font-weight:800;text-align:center;font-size:24px}
+button{border:0;border-radius:12px;padding:14px 16px;font-size:17px;font-weight:700;cursor:pointer;touch-action:manipulation}
+button:disabled{opacity:.35}
+.primary{background:#ffcf40;color:#10192e;width:100%}
+.ghost{background:#2b3d63;color:#fff}
+.danger{background:#5a2330;color:#ffb3c0}
+.lbl{font-size:13px;color:#9fb0d0;margin:10px 0 5px}
+.hint{color:#9fb0d0;font-size:13px;line-height:1.45}
+.err{background:#5a2330;color:#ffd0d8;border-radius:12px;padding:12px;margin-bottom:12px;font-size:15px}
+.roomcode{font-size:44px;font-weight:900;letter-spacing:10px;color:#ffcf40;text-align:center;margin:4px 0}
+.qr{background:#fff;border-radius:14px;padding:10px;width:210px;height:210px;margin:10px auto}
+.qr svg{width:100%;height:100%;display:block}
+.link{word-break:break-all;text-align:center;font-size:12px;color:#9fb0d0}
+.plist .pl{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#22345a;margin-bottom:7px;font-size:17px;font-weight:600}
+.pl .grow{flex:1}
+.x{background:#10192e;color:#9fb0d0;padding:6px 11px;font-size:14px}
+/* spil */
+.banner{position:sticky;top:0;z-index:5;margin:0 -12px 12px;padding:14px 16px;text-align:center;font-size:20px;font-weight:800;background:#22345a;color:#cfd9ee;border-bottom:1px solid #10192e}
+.banner.me{background:#ffcf40;color:#10192e;font-size:30px;animation:pulse 1.2s infinite}
+.banner.bad{background:#5a2330;color:#ffd0d8}
+.banner small{display:block;font-size:13px;font-weight:600;opacity:.8;margin-top:2px}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #ffcf40cc}70%{box-shadow:0 0 0 16px #ffcf4000}100%{box-shadow:0 0 0 0 #ffcf4000}}
+.sub{color:#9fb0d0;font-size:13px;text-align:center;margin:-4px 0 10px}
+.mine{position:relative}
+.mine.turn{outline:3px solid #ffcf40}
+.mhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.mhead .pts{font-size:40px;font-weight:900;color:#ffcf40;line-height:1}
+.mhead .pts small{font-size:15px;color:#9fb0d0;font-weight:600}
+.hand{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;min-height:76px}
+.row2{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
+.c{display:inline-flex;flex-direction:column;width:50px;height:72px;border-radius:9px;align-items:center;justify-content:center;font-weight:900;font-size:28px;background:#f6f1e3;color:#10192e;box-shadow:0 2px 0 #0006;line-height:1;text-align:center}
+.c i{font-style:normal;font-size:10px;font-weight:800;margin-top:3px;letter-spacing:.2px}
+.c.mod{background:#ff8a3d;color:#fff;font-size:22px}
+.c.fr{background:#7fd8ff;color:#0b3550;font-size:24px}
+.c.f3{background:#ffcf40;color:#10192e;font-size:24px}
+.c.sc{background:#e0485f;color:#fff;font-size:24px}
+.c.dup{outline:3px solid #e0485f;background:#ffd6dc;color:#b0102a}
+.c.pop{animation:pop .45s ease-out}
+@keyframes pop{0%{transform:scale(.3) rotate(-12deg);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.sm .c{width:24px;height:33px;font-size:14px;border-radius:5px;box-shadow:none}
+.sm .c.mod{font-size:11px}.sm .c.fr,.sm .c.f3,.sm .c.sc{font-size:12px}
+.sm .c i{display:none}
+.sm{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.n0{color:#555}.n1{color:#8a6d3b}.n2{color:#2e8b57}.n3{color:#c0392b}.n4{color:#2471a3}.n5{color:#16a085}.n6{color:#8e44ad}.n7{color:#d35400}.n8{color:#27ae60}.n9{color:#b7950b}.n10{color:#c2185b}.n11{color:#1a5276}.n12{color:#6c3483}
+.status{font-size:12px;font-weight:800;padding:4px 9px;border-radius:20px;background:#10192e;color:#9fb0d0;white-space:nowrap}
+.st-active{background:#1e4d3a;color:#8ff0c0}.st-stopped{background:#2b3d63;color:#cfe0ff}.st-bust{background:#e0485f;color:#fff}.st-frozen{background:#7fd8ff;color:#0b3550}.st-flip7{background:#ffcf40;color:#10192e}
+.pr{padding:10px 12px;border-radius:14px;background:#22345a;margin-bottom:8px;border:2px solid transparent}
+.pr.cur{border-color:#ffcf40;background:#3a3212}
+.pr .top{display:flex;align-items:center;gap:8px}
+.pr .nm{flex:1;font-size:17px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr .nm small{font-weight:500;color:#9fb0d0;font-size:12px;margin-left:4px}
+.pr .rp{font-size:13px;color:#9fb0d0;min-width:42px;text-align:right}
+.pr .tot{font-size:22px;font-weight:900;min-width:44px;text-align:right}
+.rank{width:24px;height:24px;border-radius:50%;background:#10192e;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex:none}
+.rank.lead{background:#ffcf40;color:#10192e}
+.log div{padding:5px 0;border-bottom:1px solid #22345a;font-size:14px;color:#cfd9ee}
+.log div:first-child{color:#fff;font-weight:700}
+.log .bust{color:#ff9aab}.log .flip7{color:#ffcf40}.log .action{color:#9fe3ff}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:6;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#10192ef5;display:flex;gap:10px;max-width:560px;margin:auto}
+.bottom button{flex:1;height:68px;font-size:22px}
+.bottom .draw{background:#ffcf40;color:#10192e;flex:1.4}
+.bottom .stop{background:#3ddc84;color:#0b2a1a}
+.bottom.go .draw{animation:pulse 1.2s infinite}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:flex-end;justify-content:center;z-index:20}
+.modal.show{display:flex}
+.sheet{background:#1b2a4a;width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 14px calc(18px + env(safe-area-inset-bottom))}
+.sheet h2{margin:0 0 6px;font-size:24px}
+.pick button{display:flex;width:100%;justify-content:space-between;align-items:center;margin-bottom:8px;background:#22345a;color:#fff;font-size:19px;padding:16px}
+.pick button b{color:#ffcf40}
+table{width:100%;border-collapse:collapse;font-size:16px;margin:8px 0 12px}
+th,td{padding:8px 4px;text-align:left;border-bottom:1px solid #2b3d63}
+th{color:#9fb0d0;font-weight:500;font-size:13px}
+td.n{text-align:right;font-weight:800}
+.win{text-align:center;padding:18px;background:linear-gradient(135deg,#ffcf40,#ff8a3d);color:#10192e;border-radius:16px;margin-bottom:12px;font-size:24px;font-weight:900}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 100px);transform:translateX(-50%) translateY(20px);background:#fff;color:#10192e;font-weight:800;padding:12px 18px;border-radius:14px;box-shadow:0 6px 24px #0008;z-index:30;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center;font-size:16px}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.bust{background:#e0485f;color:#fff}#toast.flip7{background:#ffcf40}#toast.action{background:#7fd8ff}
+.overlay{position:fixed;inset:0;background:#10192ef0;z-index:40;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+.overlay .box{max-width:360px}
+.spin{width:38px;height:38px;border:4px solid #2b3d63;border-top-color:#ffcf40;border-radius:50%;margin:0 auto 14px;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.hostfix{background:#3a2a12;border-radius:12px;padding:10px;margin-bottom:12px;font-size:14px}
+.hostfix button{margin-top:8px;width:100%}
+</style></head><body>
+<header><h1>FLIP <span>7</span></h1><div class="pill" id="pill"><span class="dot"></span>Offline</div></header>
+<main id="app"></main>
+<div class="bottom" id="bottom" style="display:none"></div>
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+<div id="toast"></div>
+<div id="ov"></div>
+<script src="vendor/peerjs.min.js"></script>
+<script src="vendor/qrcode.js"></script>
+<script src="game.js"></script>
+<script>
+'use strict';
+const G = window.Flip7;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const qs = new URLSearchParams(location.search);
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('f7o-' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('f7o-' + k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem('f7o-' + k); } catch (e) {} }
+};
+const rid = n => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
+const myId = LS.get('pid') || rid(12); LS.set('pid', myId);
+const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const genCode = () => Array.from(crypto.getRandomValues(new Uint8Array(5)), b => CODE_CHARS[b % CODE_CHARS.length]).join('');
+const PEER_KEYS = ['peerhost', 'peerport', 'peerpath', 'peersecure'];
+function peerOpts() {
+  const o = { debug: 1 };
+  if (qs.get('peerhost')) { o.host = qs.get('peerhost'); o.port = +qs.get('peerport') || 9000; o.path = qs.get('peerpath') || '/'; o.secure = qs.get('peersecure') === '1'; }
+  return o;
+}
+function linkFor(room) {
+  const p = new URLSearchParams(); p.set('room', room);
+  PEER_KEYS.forEach(k => { if (qs.get(k)) p.set(k, qs.get(k)); });
+  return location.origin + location.pathname + '?' + p.toString();
+}
+const STATUS = { active: 'Aktiv', stopped: 'Stoppet', bust: 'Bust', frozen: 'Frosset' };
+const CARD_NAME = { fr: 'Frys', f3: 'Flip 3', sc: '2. chance' };
+const CARD_DESC = { fr: 'Spilleren banker sine point og er ude af runden.', f3: 'Spilleren skal vende de næste 3 kort ét ad gangen.', sc: 'Du har allerede en 2. chance – giv denne til en anden aktiv spiller.' };
+
+// ---------- tilstand ----------
+let role = null, room = null, peer = null, S = null, view = null, conns = {}, hostConn = null;
+let connState = 'offline', errMsg = '', myName = LS.get('name', ''), rejected = false, lastMsg = 0, reconnTimer = null, freshHost = false;
+let lastSeq = null, wasMyTurn = false, prevMyCount = [0, 0], sending = false;
+
+// ---------- lyd / vibration / wakelock ----------
+let actx = null;
+document.addEventListener('pointerdown', () => { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {} }, { passive: true });
+function beep() { try { if (!actx) return; const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(0.15, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.25); o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + 0.25); } catch (e) {} }
+function buzz(p) { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} }
+let wakeLock = null;
+async function keepAwake() { try { if ('wakeLock' in navigator && !wakeLock && document.visibilityState === 'visible') { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } } catch (e) {} }
+
+// ---------- toast ----------
+let toastT = null;
+function toast(txt, kind) { const t = $('toast'); t.textContent = txt; t.className = 'show ' + (kind || ''); clearTimeout(toastT); toastT = setTimeout(() => { t.className = kind || ''; }, 2600); }
+
+// ---------- VÆRT ----------
+function saveHost() { if (S && room) LS.set('host-' + room, S); }
+function hostCreate(name, target) {
+  role = 'host'; room = genCode(); freshHost = true; myName = name;
+  S = G.createLobby(target); G.addPlayer(S, myId, name);
+  LS.set('session', { room, role: 'host' }); saveHost();
+  startHostPeer(); publish();
+}
+function resumeHost(code) {
+  role = 'host'; room = code; freshHost = false;
+  S = LS.get('host-' + code);
+  S.players.forEach(p => { p.online = p.id === myId; });
+  startHostPeer(); publish();
+}
+function startHostPeer() {
+  if (peer) try { peer.destroy(); } catch (e) {}
+  connState = 'connecting'; render();
+  const pr = peer = new Peer('flip7-' + room, peerOpts());
+  pr.on('open', () => {
+    if (pr !== peer) return;
+    connState = 'online'; errMsg = ''; freshHost = false;
+    history.replaceState(null, '', linkFor(room).replace(location.origin, ''));
+    LS.set('session', { room, role: 'host' }); render();
+  });
+  pr.on('connection', c => {
+    c.last = Date.now();
+    c.on('data', d => onHostData(c, d));
+    c.on('close', () => onHostClose(c));
+    c.on('error', () => onHostClose(c));
+  });
+  pr.on('disconnected', () => { if (pr !== peer || pr.destroyed) return; connState = 'connecting'; render(); setTimeout(() => { if (pr === peer && !pr.destroyed && pr.disconnected) try { pr.reconnect(); } catch (e) {} }, 1500); });
+  pr.on('error', e => {
+    if (pr !== peer) return;
+    console.warn('peer error', e.type, e);
+    if (e.type === 'unavailable-id') {
+      if (freshHost && S.phase === 'lobby' && S.players.length === 1) { LS.del('host-' + room); room = genCode(); saveHost(); return startHostPeer(); }
+      errMsg = 'Rumkoden er stadig optaget på serveren (fx efter genindlæsning). Prøver igen…';
+      connState = 'connecting'; render(); setTimeout(() => { if (pr === peer) startHostPeer(); }, 3000);
+    } else if (['network', 'server-error', 'socket-error', 'socket-closed', 'browser-incompatible'].includes(e.type)) {
+      errMsg = e.type === 'browser-incompatible' ? 'Denne browser understøtter ikke WebRTC.' : 'Ingen forbindelse til forbindelsesserveren. Prøver igen…';
+      connState = 'lost'; render(); if (e.type !== 'browser-incompatible') setTimeout(() => { if (pr === peer) startHostPeer(); }, 3000);
+    }
+  });
+}
+function send(c, msg) { try { if (c && c.open) c.send(msg); } catch (e) {} }
+function onHostData(c, d) {
+  if (!d || typeof d !== 'object') return;
+  c.last = Date.now();
+  if (d.t === 'hello') {
+    const pid = String(d.pid || '').slice(0, 40), name = String(d.name || 'Spiller').trim().slice(0, 16) || 'Spiller';
+    if (!pid) return;
+    let p = S.players.find(x => x.id === pid);
+    if (!p) {
+      if (S.phase !== 'lobby') { send(c, { t: 'reject', reason: 'Spillet er allerede i gang. Vent til værten starter et nyt spil.' }); return setTimeout(() => c.close(), 800); }
+      if (S.players.length >= 8) { send(c, { t: 'reject', reason: 'Spillet er fuldt (max 8 spillere).' }); return setTimeout(() => c.close(), 800); }
+      p = G.addPlayer(S, pid, name); S.seq++; S.log.push({ n: S.seq, txt: name + ' er med', kind: 'info' });
+    } else {
+      if (S.phase === 'lobby') p.name = name;
+      if (!p.online) { S.seq++; S.log.push({ n: S.seq, txt: p.name + ' er tilbage', kind: 'info' }); }
+    }
+    const old = conns[pid]; conns[pid] = c; c.pid = pid; p.online = true;
+    if (old && old !== c) try { old.close(); } catch (e) {}
+    publish();
+  } else if (d.t === 'intent' && c.pid && conns[c.pid] === c) {
+    const r = G.act(S, c.pid, { a: d.a, target: d.target });
+    if (!r.ok) send(c, { t: 'err', msg: r.err });
+    publish();
+  }
+}
+function onHostClose(c) {
+  if (!c.pid || conns[c.pid] !== c) return;
+  delete conns[c.pid];
+  const p = S.players.find(x => x.id === c.pid);
+  if (p) { p.online = false; S.seq++; S.log.push({ n: S.seq, txt: p.name + ' mistede forbindelsen', kind: 'info' }); }
+  publish();
+}
+function publish() {
+  saveHost();
+  const v = G.publicView(S);
+  Object.values(conns).forEach(c => send(c, { t: 'state', s: v }));
+  view = v; render();
+}
+setInterval(() => {
+  if (role !== 'host') return;
+  const now = Date.now();
+  Object.values(conns).forEach(c => { if (now - c.last > 12000) { try { c.close(); } catch (e) {} onHostClose(c); } else send(c, { t: 'ping' }); });
+}, 3000);
+function hostAct(a) {
+  if (role === 'host') { const r = G.act(S, myId, a); if (!r.ok) toast(r.err); publish(); }
+  else { if (!hostConn || !hostConn.open) return toast('Ingen forbindelse til værten'); send(hostConn, { t: 'intent', a: a.a, target: a.target }); sending = true; render(); }
+}
+function hostActFor(pid, a) { if (role !== 'host') return; const r = G.act(S, pid, a); if (!r.ok) toast(r.err); publish(); }
+function hostStart() { const t = parseInt(($('target') || {}).value, 10); if (t > 0) S.target = t; const r = G.startGame(S); if (!r.ok) return toast(r.err); publish(); }
+function hostNext() { G.nextRound(S); publish(); }
+function hostNewGame() { G.backToLobby(S); publish(); }
+function hostKick(pid) { const i = S.players.findIndex(p => p.id === pid); if (i <= 0 || S.phase !== 'lobby') return; const c = conns[pid]; if (c) { send(c, { t: 'reject', reason: 'Værten fjernede dig fra spillet.' }); delete conns[pid]; setTimeout(() => c.close(), 500); } S.players.splice(i, 1); publish(); }
+function hostTarget(v) { const t = parseInt(v, 10); if (t > 0 && S.phase === 'lobby') { S.target = t; publish(); } }
+
+// ---------- KLIENT ----------
+function clientJoin(code, name) {
+  role = 'client'; room = code; myName = name; rejected = false; errMsg = '';
+  LS.set('session', { room, role: 'client' }); LS.set('name', name);
+  history.replaceState(null, '', linkFor(room).replace(location.origin, ''));
+  startClientPeer();
+}
+function startClientPeer() {
+  if (peer) try { peer.destroy(); } catch (e) {}
+  connState = 'connecting'; render();
+  const pr = peer = new Peer(peerOpts());
+  pr.on('open', () => { if (pr === peer) connectToHost(); });
+  pr.on('disconnected', () => { if (pr !== peer || pr.destroyed) return; setTimeout(() => { if (pr === peer && !pr.destroyed && pr.disconnected) try { pr.reconnect(); } catch (e) {} }, 1500); });
+  pr.on('error', e => {
+    if (pr !== peer) return;
+    console.warn('peer error', e.type, e);
+    if (e.type === 'peer-unavailable') { errMsg = view ? 'Værten er ikke online lige nu. Er værtens telefon låst, eller er appen lukket?' : 'Kan ikke finde spillet ' + room + '. Tjek koden, eller om værten har spillet åbent.'; }
+    else if (e.type === 'browser-incompatible') { errMsg = 'Denne browser understøtter ikke WebRTC.'; connState = 'lost'; return render(); }
+    else errMsg = 'Ingen forbindelse til serveren. Tjek internettet. Prøver igen…';
+    connState = 'lost'; render(); scheduleReconnect();
+  });
+}
+function connectToHost() {
+  if (rejected) return;
+  if (hostConn) { const o = hostConn; hostConn = null; try { o.close(); } catch (e) {} }
+  connState = connState === 'online' ? 'connecting' : connState === 'lost' ? 'lost' : 'connecting';
+  const c = hostConn = peer.connect('flip7-' + room, { reliable: true, metadata: { pid: myId } });
+  const to = setTimeout(() => { if (hostConn === c && !c.open) { hostConn = null; try { c.close(); } catch (e) {} connState = 'lost'; if (!errMsg) errMsg = 'Kan ikke nå værten. Prøver igen…'; render(); scheduleReconnect(); } }, 9000);
+  c.on('open', () => { if (hostConn !== c) return; clearTimeout(to); connState = 'online'; errMsg = ''; lastMsg = Date.now(); send(c, { t: 'hello', pid: myId, name: myName }); render(); });
+  c.on('data', d => { if (hostConn === c) onClientData(d); });
+  const lost = () => { if (hostConn !== c) return; clearTimeout(to); hostConn = null; if (rejected) return; connState = 'lost'; errMsg = errMsg || 'Forbindelsen til værten er tabt. Prøver igen…'; render(); scheduleReconnect(); };
+  c.on('close', lost); c.on('error', lost);
+}
+function scheduleReconnect(ms) {
+  if (reconnTimer || rejected || role !== 'client') return;
+  reconnTimer = setTimeout(() => { reconnTimer = null; if (!peer || peer.destroyed) startClientPeer(); else if (peer.disconnected) { try { peer.reconnect(); } catch (e) {} setTimeout(() => peer && peer.open && connectToHost(), 1500); } else connectToHost(); }, ms || 2500);
+}
+function onClientData(d) {
+  if (!d || typeof d !== 'object') return;
+  lastMsg = Date.now();
+  if (d.t === 'state') { view = d.s; sending = false; render(); }
+  else if (d.t === 'ping') send(hostConn, { t: 'pong' });
+  else if (d.t === 'err') { sending = false; toast(d.msg); render(); }
+  else if (d.t === 'reject') { rejected = true; errMsg = d.reason; LS.del('session'); connState = 'offline'; view = null; render(); }
+}
+setInterval(() => {
+  if (role === 'client' && connState === 'online' && Date.now() - lastMsg > 10000) {
+    const c = hostConn; hostConn = null; try { c && c.close(); } catch (e) {}
+    connState = 'lost'; errMsg = 'Intet svar fra værten. Prøver igen…'; render(); scheduleReconnect(500);
+  }
+}, 2000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  if (view && view.phase !== 'lobby') keepAwake();
+  if (role === 'client' && connState !== 'online') { clearTimeout(reconnTimer); reconnTimer = null; scheduleReconnect(100); }
+  if (role === 'host' && peer && !peer.destroyed && peer.disconnected) try { peer.reconnect(); } catch (e) {}
+  if (role === 'host' && peer && peer.destroyed) startHostPeer();
+});
+function leave() {
+  const msg = role === 'host' ? 'Afslut spillet? Du er vært, så spillet stopper for alle.' : 'Forlad spillet?';
+  if (!confirm(msg)) return;
+  if (role === 'host') { Object.values(conns).forEach(c => send(c, { t: 'reject', reason: 'Værten har afsluttet spillet.' })); LS.del('host-' + room); }
+  LS.del('session');
+  setTimeout(() => { try { peer && peer.destroy(); } catch (e) {} location.href = location.pathname + '?' + new URLSearchParams([...qs].filter(([k]) => PEER_KEYS.includes(k))).toString(); }, 300);
+}
+
+// ---------- visning ----------
+function cardHtml(c, extra) {
+  let cls = 'c', inner;
+  if (c[0] === 'n') { cls += ' n' + c.slice(1); inner = c.slice(1); }
+  else if (c[0] === 'm' || c === 'x2') { cls += ' mod'; inner = G.label(c); }
+  else { cls += ' ' + c; inner = { fr: '❄', f3: '3', sc: '♥' }[c] + '<i>' + CARD_NAME[c].toUpperCase() + '</i>'; }
+  return `<span class="${cls} ${extra || ''}">${inner}</span>`;
+}
+function handHtml(p, big) {
+  const nums = p.nums.map(v => cardHtml('n' + v));
+  if (p.bustCard !== null && p.bustCard !== undefined) nums.push(cardHtml('n' + p.bustCard, 'dup'));
+  const other = p.mods.map(c => cardHtml(c)).concat(p.acts.map(c => cardHtml(c)));
+  if (!big) return nums.concat(other).join('');
+  return { nums, other };
+}
+function statusChip(p) { return p.flip7 ? '<span class="status st-flip7">FLIP 7!</span>' : `<span class="status st-${p.status}">${STATUS[p.status]}</span>`; }
+function me() { return view && view.players.find(p => p.id === myId); }
+function isMyTurn(v) {
+  if (!v || v.phase !== 'play') return false;
+  const i = v.players.findIndex(p => p.id === myId);
+  if (v.pending) return v.pending.chooser === i;
+  return v.stage === 'turns' && v.turn === i;
+}
+function setPill() {
+  const map = { online: ['on', role === 'host' ? 'Vært · online' : 'Forbundet'], connecting: ['wait', 'Forbinder…'], lost: ['off', 'Afbrudt'], offline: ['', 'Offline'] };
+  const [cls, txt] = map[connState] || map.offline;
+  $('pill').innerHTML = `<span class="dot ${cls}"></span>${esc(txt)}${room ? ' · ' + esc(room) : ''}`;
+}
+function keepInput(fn) {
+  const a = document.activeElement, id = a && a.id, val = a && a.value, ss = a && a.selectionStart;
+  fn();
+  if (id && $(id)) { const e = $(id); if (e.value !== val) e.value = val; e.focus(); try { e.setSelectionRange(ss, ss); } catch (x) {} }
+}
+function render() {
+  setPill();
+  const ov = $('ov');
+  if (role === 'client' && !rejected && view && connState !== 'online') {
+    ov.innerHTML = `<div class="overlay"><div class="box"><div class="spin"></div><h2>Forbindelsen til værten er tabt</h2><p class="hint">${esc(errMsg || 'Prøver at genoprette forbindelsen…')}</p><p class="hint">Du kommer automatisk tilbage i spillet med dine kort, når forbindelsen er genoprettet.</p><button class="ghost" onclick="leave()">Forlad spillet</button></div></div>`;
+  } else ov.innerHTML = '';
+  if (!role || rejected) return renderHome();
+  if (!view) return renderConnecting();
+  if (view.phase === 'lobby') return renderLobby();
+  renderGame();
+}
+function renderConnecting() {
+  $('bottom').style.display = 'none'; $('modal').classList.remove('show');
+  $('app').innerHTML = `<div class="card" style="text-align:center;margin-top:30px"><div class="spin"></div><h2 style="margin:0 0 6px">Forbinder til spil ${esc(room)}…</h2>${errMsg ? `<div class="err" style="margin-top:12px">${esc(errMsg)}</div>` : ''}<button class="ghost" onclick="leave()">Annuller</button></div>`;
+}
+function renderHome() {
+  $('bottom').style.display = 'none'; $('modal').classList.remove('show');
+  const qroom = (qs.get('room') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const sess = LS.get('session', null);
+  let h = '';
+  if (errMsg && rejected) h += `<div class="err">${esc(errMsg)}</div>`;
+  h += `<div class="card"><div class="lbl" style="margin-top:0">Dit navn</div><input type="text" id="name" maxlength="16" autocomplete="off" placeholder="Fx Emil" value="${esc(myName)}"></div>`;
+  const join = `<div class="card"><h3 style="margin:0 0 4px">${qroom ? 'Deltag i spil' : 'Deltag i et spil'}</h3><div class="lbl">Spilkode</div><input type="text" id="code" maxlength="5" autocomplete="off" autocapitalize="characters" placeholder="ABCDE" value="${esc(qroom)}"><button class="primary" id="btnJoin" style="margin-top:12px" onclick="doJoin()">Deltag</button></div>`;
+  const create = `<div class="card"><h3 style="margin:0 0 4px">Opret nyt spil</h3><div class="hint">Din telefon bliver vært. Hold den tændt og med appen åben under spillet.</div><div class="lbl">Spil til (point)</div><input type="number" id="tgt" inputmode="numeric" value="200"><button class="primary" id="btnCreate" style="margin-top:12px" onclick="doCreate()">Opret spil</button></div>`;
+  if (sess && !qroom && !rejected) h += `<div class="card"><button class="ghost" style="width:100%" onclick="location.href='${esc(linkFor(sess.room))}'">↻ Genoptag spil ${esc(sess.room)}</button></div>`;
+  h += qroom ? join + create : create + join;
+  h += `<div class="card hint">Tip: Tryk på del-knappen i Safari/Chrome og vælg <b>“Føj til hjemmeskærm”</b>, så ligger spillet som en app.<br>Alle spillere skal have internet. Telefonerne forbindes direkte med hinanden.</div>`;
+  $('app').innerHTML = h;
+}
+function getName() { const n = ($('name').value || '').trim().slice(0, 16); if (!n) { toast('Skriv dit navn først'); $('name').focus(); return null; } LS.set('name', n); return n; }
+function doCreate() { const n = getName(); if (!n) return; const t = parseInt($('tgt').value, 10) || 200; errMsg = ''; rejected = false; hostCreate(n, Math.max(10, t)); }
+function doJoin() { const n = getName(); if (!n) return; const c = ($('code').value || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (c.length < 4) { toast('Skriv spilkoden'); return; } clientJoin(c, n); }
+
+function renderLobby() {
+  $('bottom').style.display = 'none'; $('modal').classList.remove('show');
+  const v = view, host = role === 'host', link = linkFor(room);
+  let qr = ''; try { const q = qrcode(0, 'M'); q.addData(link); q.make(); qr = q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); } catch (e) {}
+  let h = '';
+  if (errMsg) h += `<div class="err">${esc(errMsg)}</div>`;
+  h += `<div class="card" style="text-align:center"><div class="hint">${host ? 'Lad de andre scanne koden eller skrive spilkoden' : 'Du er med! Venter på at værten starter spillet…'}</div><div class="roomcode" id="roomcode">${esc(room)}</div><div class="qr">${qr}</div><div class="link">${esc(link)}</div>${host && navigator.share ? `<button class="ghost" style="margin-top:10px" onclick="navigator.share({title:'Flip 7',text:'Spil Flip 7 med mig',url:'${esc(link)}'}).catch(()=>{})">Del link</button>` : ''}</div>`;
+  h += `<div class="card"><div class="lbl" style="margin-top:0">Spillere (${v.players.length}/8)</div><div class="plist">` + v.players.map((p, i) => `<div class="pl"><span class="dot ${p.online ? 'on' : 'off'}"></span><span class="grow">${esc(p.name)}${p.id === myId ? ' (dig)' : ''}${i === 0 ? ' 👑' : ''}</span>${host && i > 0 ? `<button class="x" onclick="hostKick('${esc(p.id)}')">✕</button>` : ''}</div>`).join('') + '</div>';
+  if (host) h += `<div class="lbl">Spil til (point)</div><input type="number" id="target" inputmode="numeric" value="${v.target}" onchange="hostTarget(this.value)"><button class="primary" id="btnStart" style="margin-top:14px;height:60px;font-size:20px" onclick="hostStart()" ${v.players.length < 2 ? 'disabled' : ''}>${v.players.length < 2 ? 'Venter på spillere…' : `Start spil (${v.players.length} spillere)`}</button>`;
+  else h += `<div class="hint">Der spilles til ${v.target} point.</div>`;
+  h += `</div><button class="ghost" style="width:100%" onclick="leave()">${host ? 'Afslut spil' : 'Forlad spil'}</button>`;
+  keepInput(() => { $('app').innerHTML = h; });
+}
+
+function renderGame() {
+  const v = view, meIdx = v.players.findIndex(p => p.id === myId), mp = v.players[meIdx];
+  const myTurn = isMyTurn(v);
+  // nye hændelser -> toast
+  if (lastSeq === null) lastSeq = v.seq;
+  if (v.seq > lastSeq) { const fresh = v.log.filter(l => l.n > lastSeq); const imp = fresh.filter(l => l.kind === 'bust' || l.kind === 'flip7' || l.kind === 'action').pop() || fresh[fresh.length - 1]; if (imp) toast(imp.txt, imp.kind); lastSeq = v.seq; }
+  if (myTurn && !wasMyTurn) { buzz([200, 100, 200]); beep(); keepAwake(); }
+  wasMyTurn = myTurn;
+  // banner
+  let bannerCls = '', bannerTxt = '', sub = '';
+  if (v.phase === 'play') {
+    if (v.pending) {
+      const ch = v.players[v.pending.chooser];
+      if (v.pending.chooser === meIdx) { bannerCls = 'me'; bannerTxt = 'Din tur!'; sub = 'Vælg hvem der får ' + CARD_NAME[v.pending.card]; }
+      else { bannerTxt = `${esc(ch.name)} vælger…`; sub = 'hvem der får ' + CARD_NAME[v.pending.card]; }
+    } else if (v.stage === 'deal') bannerTxt = 'Kortene gives…';
+    else if (v.turn === meIdx) { bannerCls = 'me'; bannerTxt = 'Din tur!'; sub = 'Træk et kort eller stop'; }
+    else if (v.turn >= 0) { bannerTxt = `Venter på ${esc(v.players[v.turn].name)}…`; sub = mp && mp.status !== 'active' ? 'Du er ude af runden' : ''; }
+  } else if (v.phase === 'roundEnd') bannerTxt = `Runde ${v.round} er slut`;
+  else if (v.phase === 'over') bannerTxt = 'Spillet er slut';
+  let h = `<div class="banner ${bannerCls}" id="banner">${bannerTxt}${sub ? `<small>${esc(sub)}</small>` : ''}</div>`;
+  h += `<div class="sub">Runde ${v.round} · Spil til ${v.target} · Bunke: ${v.deckCount} kort</div>`;
+  // værts-hjælp for offline spillere
+  if (role === 'host' && v.phase === 'play') {
+    const actor = v.pending ? v.pending.chooser : (v.stage === 'turns' ? v.turn : -1);
+    const ap = actor >= 0 && v.players[actor];
+    if (ap && !ap.online && ap.id !== myId) {
+      h += `<div class="hostfix">⚠️ <b>${esc(ap.name)}</b> er offline. Vent på at telefonen kommer tilbage, eller spil for dem:`;
+      if (v.pending) h += `<button class="ghost" onclick="hostActFor('${esc(ap.id)}',{a:'choose',target:${v.pending.options[0]}})">Giv ${CARD_NAME[v.pending.card]} til ${esc(v.players[v.pending.options[0]].name)}</button>`;
+      else { if (G.canStop(ap)) h += `<button class="ghost" onclick="hostActFor('${esc(ap.id)}',{a:'stop'})">Stop for ${esc(ap.name)}</button>`; h += `<button class="ghost" onclick="hostActFor('${esc(ap.id)}',{a:'draw'})">Træk for ${esc(ap.name)}</button>`; }
+      h += '</div>';
+    }
+  }
+  if (errMsg && role === 'host') h += `<div class="err">${esc(errMsg)}</div>`;
+  // mine kort
+  if (mp) {
+    const hd = handHtml(mp, true);
+    if (v.phase === 'play') {
+      if (hd.nums.length > prevMyCount[0] && hd.nums.length) hd.nums[hd.nums.length - 1] = hd.nums[hd.nums.length - 1].replace('class="c', 'class="c pop');
+      if (hd.other.length > prevMyCount[1] && hd.other.length) hd.other[hd.other.length - 1] = hd.other[hd.other.length - 1].replace('class="c', 'class="c pop');
+      prevMyCount = [hd.nums.length, hd.other.length];
+    } else prevMyCount = [0, 0];
+    const pts = G.roundScore(mp);
+    h += `<div class="card mine ${myTurn ? 'turn' : ''}" id="mine"><div class="mhead"><div><div class="lbl" style="margin:0 0 4px">Dine kort · ${esc(mp.name)}</div>${statusChip(mp)}${mp.sc ? ' <span class="status st-stopped">♥ 2. chance</span>' : ''}</div><div class="pts" id="mypts">${pts}<small> point</small></div></div>`;
+    h += `<div class="hand">${hd.nums.join('') || '<span class="hint">Ingen talkort endnu</span>'}</div>${hd.other.length ? `<div class="row2">${hd.other.join('')}</div>` : ''}`;
+    h += `<div class="hint" style="margin-top:8px">${new Set(mp.nums).size}/7 forskellige tal · Total: <b>${mp.total}</b></div></div>`;
+  }
+  // spillerliste
+  const ranks = v.players.map(p => p.total).slice().sort((a, b) => b - a);
+  const maxT = ranks[0];
+  const actor = v.phase === 'play' ? (v.pending ? v.pending.chooser : v.turn) : -1;
+  h += '<div class="card"><div class="lbl" style="margin-top:0">Stilling (i turrækkefølge)</div>' + v.players.map((p, i) => {
+    const rk = ranks.indexOf(p.total) + 1;
+    return `<div class="pr ${i === actor ? 'cur' : ''}" data-p="${i}"><div class="top"><span class="rank ${p.total === maxT && maxT > 0 ? 'lead' : ''}">${rk}</span><span class="nm">${i === actor ? '▶ ' : ''}${esc(p.name)}${p.id === myId ? '<small>(dig)</small>' : ''}${i === v.dealer ? '<small>giver</small>' : ''}${p.online ? '' : '<small style="color:#ff9aab">offline</small>'}</span>${statusChip(p)}<span class="rp">+${G.roundScore(p)}</span><span class="tot">${p.total}</span></div><div class="sm">${handHtml(p, false)}</div></div>`;
+  }).join('') + '</div>';
+  h += '<div class="card log"><div class="lbl" style="margin-top:0">Seneste</div>' + v.log.slice(-8).reverse().map(l => `<div class="${l.kind}">${esc(l.txt)}</div>`).join('') + '</div>';
+  h += `<button class="ghost" style="width:100%;margin-bottom:10px" onclick="leave()">${role === 'host' ? 'Afslut spil' : 'Forlad spil'}</button>`;
+  $('app').innerHTML = h;
+  // knapper
+  const canAct = v.phase === 'play' && !v.pending && v.stage === 'turns' && v.turn === meIdx && !sending;
+  const b = $('bottom'); b.style.display = v.phase === 'play' ? 'flex' : 'none';
+  b.className = 'bottom' + (canAct ? ' go' : '');
+  b.innerHTML = `<button class="stop" id="btnStop" ${canAct && G.canStop(mp) ? '' : 'disabled'} onclick="hostAct({a:'stop'})">Stop</button><button class="draw" id="btnDraw" ${canAct ? '' : 'disabled'} onclick="hostAct({a:'draw'})">Træk kort</button>`;
+  // modal: målvalg / rundeslut / spilslut
+  const m = $('modal'), sh = $('sheet');
+  if (v.phase === 'play' && v.pending && v.pending.chooser === meIdx) {
+    const P = v.pending;
+    sh.innerHTML = `<h2>Du trak ${cardHtml(P.card).replace('class="c', 'class="c" style="width:34px;height:46px;font-size:18px;vertical-align:middle').replace(/<i>.*<\/i>/, '')} ${CARD_NAME[P.card]}</h2><p class="hint">${CARD_DESC[P.card]} Vælg en spiller:</p><div class="pick" id="pick">` +
+      P.options.map(i => `<button data-t="${i}" ${sending ? 'disabled' : ''} onclick="hostAct({a:'choose',target:${i}})"><span>${esc(v.players[i].name)}${i === meIdx ? ' (dig selv)' : ''}</span><b>${G.roundScore(v.players[i])} p</b></button>`).join('') + '</div>';
+    m.classList.add('show');
+  } else if (v.phase === 'roundEnd' || v.phase === 'over') {
+    const order = v.players.map((p, i) => i).sort((a, b) => v.players[b].total - v.players[a].total);
+    let s = v.phase === 'over' ? `<div class="win">🏆 ${esc(v.players[v.winners[0]].name)} vinder med ${v.players[v.winners[0]].total} point!</div>` : `<h2>Runde ${v.round} er slut</h2>`;
+    if (v.tie) s += '<p class="hint">Uafgjort i toppen – der spilles en runde mere.</p>';
+    s += '<table id="summary"><tr><th>Spiller</th><th>Runde</th><th style="text-align:right">Point</th><th style="text-align:right">Total</th></tr>' + order.map(i => { const p = v.players[i]; return `<tr><td><b>${esc(p.name)}</b><div class="sm">${handHtml(p, false)}</div></td><td>${statusChip(p)}</td><td class="n" style="color:${p.roundPts ? '#fff' : '#e0485f'}">+${p.roundPts}</td><td class="n" style="font-size:20px">${p.total}</td></tr>`; }).join('') + '</table>';
+    if (role === 'host') s += v.phase === 'over' ? `<button class="primary" id="btnNew" onclick="hostNewGame()">Nyt spil</button>` : `<button class="primary" id="btnNext" style="height:60px;font-size:20px" onclick="hostNext()">Næste runde</button>`;
+    else s += `<p class="hint" style="text-align:center">Venter på at ${esc(v.players[0].name)} ${v.phase === 'over' ? 'starter et nyt spil' : 'starter næste runde'}…</p>`;
+    sh.innerHTML = s; m.classList.add('show');
+  } else m.classList.remove('show');
+}
+
+// ---------- start ----------
+(function boot() {
+  const qroom = (qs.get('room') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const sess = LS.get('session', null);
+  if (qroom && sess && sess.room === qroom && sess.role === 'host' && LS.get('host-' + qroom)) resumeHost(qroom);
+  else if (qroom && sess && sess.room === qroom && sess.role === 'client' && myName) clientJoin(qroom, myName);
+  else render();
+})();
+</script></body></html>
