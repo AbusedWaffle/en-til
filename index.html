@@ -15,7 +15,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;background:#10192e;color:#fff;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);overscroll-behavior:none;-webkit-user-select:none;user-select:none}
-header{display:flex;align-items:center;gap:10px;padding:10px 14px;max-width:560px;margin:auto}
+header{display:flex;align-items:center;gap:8px;padding:10px 14px;max-width:560px;margin:auto}
 h1{margin:0;font-size:22px;letter-spacing:1px;flex:1}h1 span{color:#ffcf40}
 .pill{font-size:12px;padding:5px 10px;border-radius:20px;background:#1b2a4a;color:#9fb0d0;display:flex;align-items:center;gap:6px;white-space:nowrap}
 .dot{width:9px;height:9px;border-radius:50%;background:#6b7a99;display:inline-block;flex:none}
@@ -216,22 +216,40 @@ td.n{text-align:right;font-weight:800}
 .trophy{font-size:110px;animation:icein .8s both}
 .conf{position:absolute;top:42%;left:50%;width:9px;height:15px;background:var(--c);border-radius:2px;z-index:1;animation:conf var(--d) var(--dl) both;pointer-events:none}
 @keyframes conf{0%{transform:translate(0,0) rotate(0) scale(.4);animation-timing-function:cubic-bezier(.1,.8,.3,1)}28%{transform:translate(var(--bx),var(--by)) rotate(calc(var(--r)/3)) scale(1);animation-timing-function:cubic-bezier(.45,0,.8,.7)}100%{transform:translate(var(--sx),70vh) rotate(var(--r))}}
-@media (prefers-reduced-motion:reduce){
-  .c.flipin,.c.glow,.c.crack,#app.shake,.fx-shake,.fx-ice,.fx-glow,.fx-stop,.fx-gold,.fxrows tr,.banner.me,.bottom.go .draw{animation:none!important}
-  #fx *,#fx::before{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important}
-  #fx .bar{animation:bar var(--dur) linear both!important}
-  #fx .flake,#fx .conf{display:none}
-  .floaty{animation:fadeq 1.2s both!important}
-}
+/* Dæmpede animationer (standard ved prefers-reduced-motion) */
+body.anim-reduced .c.flipin,body.anim-reduced .c.glow,body.anim-reduced .c.crack,body.anim-reduced #app.shake,body.anim-reduced .fx-shake,body.anim-reduced .fx-ice,body.anim-reduced .fx-glow,body.anim-reduced .fx-stop,body.anim-reduced .fx-gold,body.anim-reduced .fxrows tr,body.anim-reduced .banner.me,body.anim-reduced .bottom.go .draw{animation:none!important}
+body.anim-reduced #fx *,body.anim-reduced #fx::before{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important}
+body.anim-reduced #fx .bar{animation:bar var(--dur) linear both!important}
+body.anim-reduced #fx .flake,body.anim-reduced #fx .conf{display:none}
+body.anim-reduced .floaty{animation:fadeq 1.2s both!important}
+/* Ingen animationer: kun statisk tekst */
+body.anim-none *:not(.spin),body.anim-none *::before,body.anim-none *::after{animation:none!important;transition:none!important}
+body.anim-none #fx,body.anim-none .floaty{display:none!important}
+#toast.cue{white-space:pre-line;line-height:1.35;border:2px solid #fff6}
+/* indstillinger */
+.gear{background:#1b2a4a;color:#cfd9ee;width:40px;height:40px;padding:0;border-radius:50%;font-size:21px;line-height:40px;flex:none}
+#setm{position:fixed;inset:0;background:#000b;z-index:60;display:none;align-items:flex-end;justify-content:center}
+#setm.show{display:flex}
+#setm .sheet h2{display:flex;align-items:center;justify-content:space-between}
+.seg{display:flex;background:#0d1628;border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;padding:12px 4px;font-size:16px;background:transparent;color:#9fb0d0;border-radius:9px}
+.seg button.on{background:#ffcf40;color:#10192e}
+.trow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #2b3d63;font-size:17px;font-weight:700}
+.trow small{display:block;font-weight:500;font-size:12px;color:#9fb0d0;margin-top:2px}
+.sw{width:58px;height:34px;border-radius:17px;background:#2b3d63;position:relative;padding:0;flex:none}
+.sw::after{content:'';position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:50%;background:#fff;transition:left .15s}
+.sw.on{background:#3ddc84}.sw.on::after{left:28px}
+.sw:disabled{opacity:.35}
 @keyframes fadeq{0%,100%{opacity:0}20%,80%{opacity:1}}
 </style></head><body>
-<header><h1>FLIP <span>7</span></h1><div class="pill" id="pill"><span class="dot"></span>Offline</div></header>
+<header><h1>FLIP <span>7</span></h1><div class="pill" id="pill"><span class="dot"></span>Offline</div><button class="gear" id="gear" aria-label="Indstillinger" onclick="openSettings()">⚙</button></header>
 <main id="app"></main>
 <div class="bottom" id="bottom" style="display:none"></div>
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
 <div id="toast"></div>
 <div id="ov"></div>
 <div id="fx" role="status" aria-live="assertive"></div>
+<div id="setm" onclick="if(event.target===this)closeSettings()"><div class="sheet" id="setsheet"></div></div>
 <script src="vendor/peerjs.min.js"></script>
 <script src="vendor/qrcode.js"></script>
 <script src="game.js"></script>
@@ -270,17 +288,52 @@ let role = null, room = null, peer = null, S = null, view = null, conns = {}, ho
 let connState = 'offline', errMsg = '', myName = LS.get('name', ''), rejected = false, lastMsg = 0, reconnTimer = null, freshHost = false;
 let lastSeq = null, wasMyTurn = false, sending = false, lastEv = null;
 
+// ---------- indstillinger (kun denne enhed, gemmes i f7o-settings, sendes aldrig over nettet) ----------
+const RM = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+const CAN_VIB = typeof navigator.vibrate === 'function';
+const ANIM_MODES = ['full', 'reduced', 'none'];
+function loadSettings() {
+  const s = LS.get('settings', {}) || {};
+  return { anim: ANIM_MODES.includes(s.anim) ? s.anim : (RM.matches ? 'reduced' : 'full'), sound: s.sound !== false, vib: s.vib !== false };
+}
+let SET = loadSettings();
+function applySettings() {
+  document.body.classList.toggle('anim-reduced', SET.anim === 'reduced');
+  document.body.classList.toggle('anim-none', SET.anim === 'none');
+}
+function setSetting(k, v) {
+  SET[k] = v; LS.set('settings', SET); applySettings();
+  if (k === 'anim' && v === 'none' && typeof fxQ !== 'undefined') { fxQ = []; if (fxCur) fxNext(); }
+  if (k === 'sound' && v) beep(true);
+  if (k === 'vib' && v) buzz(40, true);
+  renderSettings();
+}
+const reducedFx = () => SET.anim === 'reduced';
+function renderSettings() {
+  const seg = [['full', 'Fulde'], ['reduced', 'Dæmpede'], ['none', 'Ingen']].map(([k, t]) => `<button data-anim="${k}" class="${SET.anim === k ? 'on' : ''}" onclick="setSetting('anim','${k}')">${t}</button>`).join('');
+  const desc = { full: 'Store animationer for bust, frys, specialkort og Flip 7.', reduced: 'Korte overlays uden rystelser, konfetti og sne.', none: 'Ingen animationer – kun en kort tekst om hvad der skete.' }[SET.anim];
+  $('setsheet').innerHTML = `<h2>Indstillinger <button class="x" onclick="closeSettings()" aria-label="Luk">✕</button></h2>
+    <div class="lbl">Animationer</div><div class="seg" id="segAnim">${seg}</div><div class="hint" style="margin:6px 0 10px">${desc}</div>
+    <div class="trow"><span>Lyd<small>Bip når det er din tur, og lydeffekter</small></span><button class="sw ${SET.sound ? 'on' : ''}" id="swSound" role="switch" aria-checked="${SET.sound}" aria-label="Lyd" onclick="setSetting('sound',${!SET.sound})"></button></div>
+    <div class="trow"><span>Vibration<small>${CAN_VIB ? 'Vibrerer når det er din tur og ved hændelser' : 'Din telefon understøtter ikke vibration i browseren (fx iPhone)'}</small></span><button class="sw ${SET.vib && CAN_VIB ? 'on' : ''}" id="swVib" role="switch" aria-checked="${SET.vib && CAN_VIB}" aria-label="Vibration" ${CAN_VIB ? '' : 'disabled'} onclick="setSetting('vib',${!SET.vib})"></button></div>
+    <div class="hint" style="margin-top:4px">Gælder kun denne telefon.</div>
+    <button class="primary" style="margin-top:12px" onclick="closeSettings()">Luk</button>`;
+}
+function openSettings() { renderSettings(); $('setm').classList.add('show'); }
+function closeSettings() { $('setm').classList.remove('show'); }
+applySettings();
+
 // ---------- lyd / vibration / wakelock ----------
 let actx = null;
 document.addEventListener('pointerdown', () => { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {} }, { passive: true });
-function beep() { try { if (!actx) return; const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(0.15, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.25); o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + 0.25); } catch (e) {} }
-function buzz(p) { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} }
+function beep(force) { try { if (!actx || !SET.sound) return; const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(0.15, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.25); o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + 0.25); } catch (e) {} }
+function buzz(p) { try { if (SET.vib && CAN_VIB) navigator.vibrate(p); } catch (e) {} }
 let wakeLock = null;
 async function keepAwake() { try { if ('wakeLock' in navigator && !wakeLock && document.visibilityState === 'visible') { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } } catch (e) {} }
 
 // ---------- toast ----------
 let toastT = null;
-function toast(txt, kind) { const t = $('toast'); t.textContent = txt; t.className = 'show ' + (kind || ''); clearTimeout(toastT); toastT = setTimeout(() => { t.className = kind || ''; }, 2600); }
+function toast(txt, kind, ms) { const t = $('toast'); t.textContent = txt; t.className = 'show ' + (kind || ''); clearTimeout(toastT); toastT = setTimeout(() => { t.className = kind || ''; }, ms || 2600); }
 
 // ---------- VÆRT ----------
 function saveHost() { if (S && room) LS.set('host-' + room, S); }
@@ -448,7 +501,6 @@ function leave() {
 }
 
 // ---------- animationer (hændelser fra værten: view.events med stigende id) ----------
-const RM = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
 const FX_BIG = { bust: 1, freeze: 1, flip3: 1, save: 1, sc: 1, flip7: 1, win: 1 };
 let fxBig = false, fxQ = [], fxCur = null, fxTimer = null, fxOutT = null;
 // Nye hændelser siden sidst. Første visning (join, genindlæsning, genforbindelse) springer gamle hændelser over.
@@ -461,7 +513,7 @@ function takeEvents(v) {
 }
 function tone(f, t0, dur, type, vol, f2) {
   try {
-    if (!actx || actx.state !== 'running') return;
+    if (!actx || actx.state !== 'running' || !SET.sound) return;
     const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + t0;
     o.type = type || 'sine'; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
     g.gain.setValueAtTime(vol || 0.08, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
@@ -492,7 +544,7 @@ function fxHtml(o, v) {
       <div class="ttl"><span class="crk" data-t="BUST!">BUST!</span></div><div class="sub">${Su(e.p)} røg ud!</div>
       <div class="sm2">Trak ${numOf(e.card)} igen${e.f3 ? ' under Flip 3' : ''}${e.lost ? ` · ${e.lost} point tabt` : ''}</div>` };
     case 'freeze': return {
-      dur: 1700, html: `${flakes(RM.matches ? 0 : 22)}<div class="vis"><div class="ice">❄</div></div><div class="ttl">Frosset!</div>${who(e.p, e.t)}
+      dur: 1700, html: `${flakes(reducedFx() ? 0 : 22)}<div class="vis"><div class="ice">❄</div></div><div class="ttl">Frosset!</div>${who(e.p, e.t)}
       <div class="sub">${e.p === e.t ? `${Su(e.p)} frøs ${e.p === v.players.findIndex(p => p.id === myId) ? 'dig' : 'sig'} selv` : `${Su(e.p)} frøs ${P(e.t)}`}</div>
       <div class="sm2">${e.pts} point i banken · ude af runden</div>` };
     case 'flip3': {
@@ -508,10 +560,10 @@ function fxHtml(o, v) {
       dur: 1300, html: `<div class="vis"><div class="shield">♥</div></div><div class="ttl" style="font-size:clamp(44px,14vw,70px)">2. chance!</div>${who(e.p, e.t)}
       <div class="sub">${e.p === e.t ? `${Su(e.t)} fik en 2. chance` : `${Su(e.p)} gav ${P(e.t)} en 2. chance`}</div><div class="sm2">Redder én gang fra bust</div>` };
     case 'flip7': return {
-      dur: 2000, html: `${confetti(RM.matches ? 0 : 60)}<div class="vis"><div class="bonus">+15</div></div><div class="ttl">FLIP 7!</div>
+      dur: 2000, html: `${confetti(reducedFx() ? 0 : 60)}<div class="vis"><div class="bonus">+15</div></div><div class="ttl">FLIP 7!</div>
       <div class="sub">${Su(e.p)} fik 7 forskellige tal!</div><div class="sm2">${e.pts} point i runden – runden slutter</div>` };
     case 'win': return {
-      dur: 2600, html: `${confetti(RM.matches ? 0 : 90)}<div class="vis"><div class="trophy">🏆</div></div><div class="ttl" style="font-size:clamp(40px,13vw,64px)">${Su(e.p)} vinder!</div>
+      dur: 2600, html: `${confetti(reducedFx() ? 0 : 90)}<div class="vis"><div class="trophy">🏆</div></div><div class="ttl" style="font-size:clamp(40px,13vw,64px)">${Su(e.p)} vinder!</div>
       <div class="sub">${e.pts} point</div>` };
   }
   return null;
@@ -529,7 +581,7 @@ function fxNext() {
   const r = fxHtml(o, o.v);
   if (!r) return fxNext();
   let dur = r.dur;
-  if (RM.matches) dur = Math.min(dur, 1300);
+  if (reducedFx()) dur = Math.min(dur, 1300);
   if (fxQ.length >= 2) dur = Math.round(dur * 0.7);
   el.className = ''; void el.offsetWidth; // genstart CSS-animationer
   el.innerHTML = `<div class="fxb">${r.html}</div><div class="tap">Tryk for at fortsætte</div><div class="bar"></div>`;
@@ -539,7 +591,7 @@ function fxNext() {
   const meIdx = o.v.players.findIndex(p => p.id === myId), mine = o.e.t !== undefined ? o.e.t === meIdx : o.e.p === meIdx;
   buzz(mine || o.e.type === 'win' ? VIB_ME[o.e.type] : 30);
   if (SFX[o.e.type]) SFX[o.e.type]();
-  if (o.e.type === 'bust' && !RM.matches) { const a = $('app'); a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake'); setTimeout(() => a.classList.remove('shake'), 600); }
+  if (o.e.type === 'bust' && !reducedFx()) { const a = $('app'); a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake'); setTimeout(() => a.classList.remove('shake'), 600); }
   fxTimer = setTimeout(fxDone, dur);
 }
 function fxDone() {
@@ -557,9 +609,32 @@ function fxCard(scope, card, cls, delay, dup) {
   fxAddCls(list[list.length - 1], cls, delay);
 }
 function fxFloat(el, txt, cls) { if (!el) return; const f = document.createElement('div'); f.className = 'floaty ' + (cls || ''); f.textContent = txt; el.appendChild(f); }
+// Tilstand 'Ingen': kort statisk tekst i stedet for animation (blokerer ikke input)
+function cueText(e, v, after) {
+  const Su = i => fxEsc(v, i, true), P = i => fxEsc(v, i, false), un = s => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  let t = '';
+  if (e.type === 'bust') t = `💥 BUST! ${Su(e.p)} røg ud (trak ${numOf(e.card)} igen)`;
+  else if (e.type === 'freeze') t = e.p === e.t ? `❄ Frosset! ${Su(e.p)} frøs ${e.p === v.players.findIndex(p => p.id === myId) ? 'dig' : 'sig'} selv (${e.pts} point)` : `❄ Frosset! ${Su(e.p)} frøs ${P(e.t)} (${e.pts} point)`;
+  else if (e.type === 'flip3') { const cs = after.filter(x => x.f3 && x.p === e.t && (x.type === 'card' || x.type === 'bust' || x.type === 'save')).slice(0, 3).map(x => G.label(x.card)); t = (e.p === e.t ? `Flip 3! ${Su(e.t)} tager selv Flip 3` : `Flip 3! ${Su(e.p)} ➜ ${P(e.t)}`) + (cs.length ? ` (${cs.join(', ')})` : ''); }
+  else if (e.type === 'save') t = `♥ Reddet! ${Su(e.p)} trak ${numOf(e.card)} igen – 2. chance brugt`;
+  else if (e.type === 'sc') t = e.p === e.t ? `♥ ${Su(e.t)} fik en 2. chance` : `♥ ${Su(e.p)} gav ${P(e.t)} en 2. chance`;
+  else if (e.type === 'flip7') t = `⭐ FLIP 7! ${Su(e.p)} fik 7 forskellige tal (+15)`;
+  else if (e.type === 'win') t = `🏆 ${Su(e.p)} vinder med ${e.pts} point!`;
+  return un(t);
+}
+const CUE_KIND = { bust: 'bust', freeze: 'action', flip3: 'action', sc: 'action', save: 'action', flip7: 'flip7', win: 'flip7' };
 // Afspil hændelser: små effekter direkte på kort/rækker, store som overlay i kø
 function playEvents(fresh, v) {
   const meIdx = v.players.findIndex(p => p.id === myId);
+  if (SET.anim === 'none') {
+    const big = fresh.map((e, k) => [e, k]).filter(([e]) => FX_BIG[e.type]);
+    if (!big.length) return;
+    const lines = big.map(([e, k]) => cueText(e, v, fresh.slice(k + 1))).slice(-3);
+    const last = big[big.length - 1][0], mineEv = big.map(x => x[0]).find(e => (e.t !== undefined ? e.t : e.p) === meIdx);
+    toast(lines.join('\n'), 'cue ' + CUE_KIND[last.type], 2600 + 900 * lines.length);
+    const ev = mineEv || last; buzz(mineEv || ev.type === 'win' ? VIB_ME[ev.type] : 30); if (SFX[ev.type]) SFX[ev.type]();
+    return;
+  }
   let stagger = 0;
   fresh.forEach((e, k) => {
     const row = fxRow(e.p), mineEl = e.p === meIdx ? $('mine') : null;

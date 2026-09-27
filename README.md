@@ -33,4 +33,6 @@ Målet er at være den første, der når 200 point. Hver runde handler om at tr�
 Skærmen viser hele tiden dine kort, dine point i runden, alles kort og stillingen.
 
 ## Animationer
-Alle telefoner viser med det samme, hvad der sker, og hvem det sker for: **BUST!** med rystelse og et knækket kort, **Frosset!** med sne og is, **Flip 3!** hvor de tre kort vendes ét ad gangen, **2. chance** og **Reddet!**, når den redder dig, konfetti ved **Flip 7** (+15) og når nogen vinder. Når nogen giver et kort til en anden, står der, hvem der gav det til hvem. Tryk på skærmen for at lukke en animation med det samme. Har din telefon slået *reducer bevægelse* til, bliver animationerne dæmpet.
+Alle telefoner viser med det samme, hvad der sker, og hvem det sker for: **BUST!** med rystelse og et knækket kort, **Frosset!** med sne og is, **Flip 3!** hvor de tre kort vendes ét ad gangen, **2. chance** og **Reddet!**, når den redder dig, konfetti ved **Flip 7** (+15) og når nogen vinder. Når nogen giver et kort til en anden, står der, hvem der gav det til hvem. Tryk på skærmen for at lukke en animation med det samme.
+
+Tryk på **⚙** øverst til højre for at åbne **Indstillinger** (gælder kun din egen telefon). Under **Animationer** kan du vælge **Fulde**, **Dæmpede** (korte animationer uden rystelser, konfetti og sne) eller **Ingen** (kun en kort tekst om, hvad der skete). Du kan også slå **lyd** og **vibration** til og fra. Vibration virker ikke på iPhone. Har din telefon slået *reducer bevægelse* til, starter animationerne som dæmpede.
