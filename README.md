@@ -31,3 +31,6 @@ Målet er at være den første, der når 200 point. Hver runde handler om at tr�
 - **Vinder:** Når nogen har nået målet, spilles runden færdig, og den med flest point vinder. Er der uafgjort i toppen, spilles én runde mere.
 
 Skærmen viser hele tiden dine kort, dine point i runden, alles kort og stillingen.
+
+## Animationer
+Alle telefoner viser med det samme, hvad der sker, og hvem det sker for: **BUST!** med rystelse og et knækket kort, **Frosset!** med sne og is, **Flip 3!** hvor de tre kort vendes ét ad gangen, **2. chance** og **Reddet!**, når den redder dig, konfetti ved **Flip 7** (+15) og når nogen vinder. Når nogen giver et kort til en anden, står der, hvem der gav det til hvem. Tryk på skærmen for at lukke en animation med det samme. Har din telefon slået *reducer bevægelse* til, bliver animationerne dæmpet.

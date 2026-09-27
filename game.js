@@ -1,7 +1,7 @@
 /* Flip 7 – ren spillogik (ingen DOM, ingen netværk). Bruges af index.html (vært) og af tests i Node. */
 (function (root) {
   'use strict';
-  var MAX_LOG = 40;
+  var MAX_LOG = 40, MAX_EV = 60;
 
   function buildDeck() {
     var d = ['n0'];
@@ -31,6 +31,7 @@
     if (p.flip7) s += 15;
     return s;
   }
+  function roundScoreRaw(p) { return roundScore({ status: 'active', nums: p.nums, mods: p.mods, flip7: false }); }
   function tableCards(p) {
     var c = p.nums.map(function (v) { return 'n' + v; }).concat(p.mods, p.acts);
     if (p.bustCard !== null && p.bustCard !== undefined) c.push('n' + p.bustCard);
@@ -41,12 +42,23 @@
     S.log.push({ n: S.seq, txt: txt, kind: kind || '' });
     if (S.log.length > MAX_LOG) S.log.splice(0, S.log.length - MAX_LOG);
   }
+  // Hændelseslog til animationer: {id, type, p (spiller), t (mål), card, ...}. id stiger altid (evSeq), så klienter kan
+  // afspille hver hændelse præcis én gang.
+  function ev(S, type, data) {
+    if (!S.events) S.events = [];
+    S.evSeq = (S.evSeq || 0) + 1;
+    var e = { id: S.evSeq, type: type }, k;
+    for (k in data) if (data[k] !== undefined) e[k] = data[k];
+    S.events.push(e);
+    if (S.events.length > MAX_EV) S.events.splice(0, S.events.length - MAX_EV);
+    return e;
+  }
   function nm(S, i) { return S.players[i].name; }
   function isActive(S, i) { return S.players[i].status === 'active'; }
   function activeIdx(S) { var r = []; for (var i = 0; i < S.players.length; i++) if (isActive(S, i)) r.push(i); return r; }
 
   function createLobby(target) {
-    return { v: 1, phase: 'lobby', target: target || 200, players: [], log: [], seq: 0 };
+    return { v: 1, phase: 'lobby', target: target || 200, players: [], log: [], seq: 0, events: [], evSeq: 0 };
   }
   function addPlayer(S, id, name) {
     var p = { id: id, name: name, online: true, total: 0 };
@@ -74,6 +86,7 @@
     S.queue = [];
     for (var k = 1; k <= n; k++) S.queue.push({ t: 'deal', i: (S.dealer + k) % n });
     log(S, 'Runde ' + S.round + ' – ' + nm(S, S.dealer) + ' giver', 'info');
+    ev(S, 'round', { round: S.round, p: S.dealer });
     process(S, rng);
   }
   function drawCard(S, rng) {
@@ -86,7 +99,7 @@
   }
   // Giv et kort til spiller i. frame = aktiv Flip 3 (eller null).
   function give(S, i, card, frame, verb) {
-    var p = S.players[i];
+    var p = S.players[i], f3 = frame ? 1 : undefined, deal = verb === 'fik' ? 1 : undefined;
     if (isNum(card)) {
       var v = numVal(card);
       if (p.nums.indexOf(v) >= 0) {
@@ -94,21 +107,25 @@
           p.sc = false; p.acts.splice(p.acts.indexOf('sc'), 1);
           S.discard.push('sc', card);
           log(S, nm(S, i) + ' ' + verb + ' ' + v + ' igen – reddet af 2. chance!', 'save');
+          ev(S, 'save', { p: i, card: card, f3: f3 });
         } else {
           p.status = 'bust'; p.bustCard = v;
           log(S, nm(S, i) + ' ' + verb + ' ' + v + ' igen og gik bust!', 'bust');
+          ev(S, 'bust', { p: i, card: card, f3: f3, lost: roundScoreRaw(p) });
         }
       } else {
         p.nums.push(v);
         log(S, nm(S, i) + ' ' + verb + ' ' + v, '');
-        if (p.nums.length >= 7) { p.flip7 = true; S.flip7End = true; log(S, nm(S, i) + ' fik Flip 7! +15', 'flip7'); }
+        ev(S, 'card', { p: i, card: card, f3: f3, deal: deal });
+        if (p.nums.length >= 7) { p.flip7 = true; S.flip7End = true; log(S, nm(S, i) + ' fik Flip 7! +15', 'flip7'); ev(S, 'flip7', { p: i, pts: roundScore(p) }); }
       }
       return;
     }
     log(S, nm(S, i) + ' ' + verb + ' ' + label(card), card === 'fr' || card === 'f3' || card === 'sc' ? 'action' : '');
+    ev(S, 'card', { p: i, card: card, f3: f3, deal: deal });
     if (card[0] === 'm' || card === 'x2') { p.mods.push(card); return; }
     if (card === 'sc') {
-      if (!p.sc) { p.sc = true; p.acts.push('sc'); }
+      if (!p.sc) { p.sc = true; p.acts.push('sc'); ev(S, 'sc', { p: i, t: i }); }
       else S.queue.unshift({ t: 'assign', card: 'sc', from: i });
       return;
     }
@@ -124,13 +141,16 @@
     if (card === 'fr') {
       tp.status = 'frozen'; tp.acts.push('fr');
       log(S, self ? nm(S, from) + ' frøs sig selv (' + roundScore(tp) + ' point)' : nm(S, from) + ' frøs ' + tp.name + ' (' + roundScore(tp) + ' point)', 'action');
+      ev(S, 'freeze', { p: from, t: target, pts: roundScore(tp) });
     } else if (card === 'f3') {
       tp.acts.push('f3');
       log(S, self ? nm(S, from) + ' tager selv Flip 3' : nm(S, from) + ' giver Flip 3 til ' + tp.name, 'action');
+      ev(S, 'flip3', { p: from, t: target });
       S.queue.unshift({ t: 'flip3', target: target, left: 3, aside: [] });
     } else if (card === 'sc') {
       tp.sc = true; tp.acts.push('sc');
       log(S, nm(S, from) + ' giver 2. chance til ' + tp.name, 'action');
+      ev(S, 'sc', { p: from, t: target });
     }
   }
   function nextTurn(S, from) {
@@ -184,10 +204,11 @@
     var pts = S.players.map(function (p) { p.roundPts = roundScore(p); p.total += p.roundPts; return p.roundPts; });
     S.history.push(pts);
     log(S, 'Runde ' + S.round + ' er slut', 'info');
+    ev(S, 'roundEnd', { round: S.round, pts: pts });
     var max = Math.max.apply(null, S.players.map(function (p) { return p.total; }));
     if (max >= S.target) {
       var lead = []; S.players.forEach(function (p, i) { if (p.total === max) lead.push(i); });
-      if (lead.length === 1) { S.phase = 'over'; S.winners = lead; log(S, S.players[lead[0]].name + ' vinder med ' + max + ' point!', 'flip7'); return; }
+      if (lead.length === 1) { S.phase = 'over'; S.winners = lead; log(S, S.players[lead[0]].name + ' vinder med ' + max + ' point!', 'flip7'); ev(S, 'win', { p: lead[0], pts: max }); return; }
       S.tie = true; log(S, 'Uafgjort på ' + max + ' point – der spilles en runde mere', 'info');
     }
     S.phase = 'roundEnd';
@@ -204,6 +225,7 @@
         if (!canStop(S.players[i])) return { ok: false, err: 'Du har ingen kort endnu' };
         S.players[i].status = 'stopped';
         log(S, nm(S, i) + ' stopper med ' + roundScore(S.players[i]) + ' point', 'stop');
+        ev(S, 'stop', { p: i, pts: roundScore(S.players[i]) });
       }
       process(S, rng); return { ok: true };
     }
@@ -238,5 +260,6 @@
   var api = { buildDeck: buildDeck, shuffle: shuffle, label: label, roundScore: roundScore, tableCards: tableCards, createLobby: createLobby,
     addPlayer: addPlayer, startGame: startGame, startRound: startRound, nextRound: nextRound, act: act, process: process, endRound: endRound,
     canStop: canStop, activeIdx: activeIdx, backToLobby: backToLobby, countCards: countCards, publicView: publicView, drawCard: drawCard };
+  api.eventsSince = function (S, id) { return (S.events || []).filter(function (e) { return e.id > id; }); };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.Flip7 = api;
 })(this);
