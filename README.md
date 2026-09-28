@@ -1,6 +1,8 @@
-# Flip 7 online
+# Én til? online
 
-**Spil her:** https://abusedwaffle.github.io/flip7/
+**Spil her:** https://abusedwaffle.github.io/en-til/
+
+*Uofficiel fan-lavet version. Ikke tilknyttet eller godkendt af The Op / USAOPOLY. Kræver ikke det fysiske spil.*
 
 ## Sådan kommer I ind i spillet
 1. **Værten** (én person) åbner linket, skriver sit navn og opretter et spil. Der vises en spilkode på 5 tegn og en QR-kode.
@@ -20,11 +22,11 @@ Målet er at være den første, der når 200 point. Hver runde handler om at tr�
 
 - **Din tur:** Når det er din tur, står der **Din tur!** øverst. Så trykker du enten **Træk kort** for at få et kort mere eller **Stop** for at gemme dine point for runden. Når det er en andens tur, står der, hvem I venter på.
 - **Bust:** Trækker du et tal, du allerede har, går du bust og får 0 point i runden.
-- **Flip 7:** Får du 7 forskellige tal, slutter runden med det samme for alle, og du får 15 bonuspoint.
+- **7 forskellige (SYV!):** Får du 7 forskellige tal, slutter runden med det samme for alle, og du får 15 bonuspoint.
 - **Point:** Du får summen af dine talkort. Et **×2**-kort fordobler talkortene, og **plus-kort** (+2 til +10) lægges til bagefter.
 - **Specialkort:**
   - **Frys:** Du vælger en spiller (også gerne dig selv), som gemmer sine point og er færdig for runden.
-  - **Flip 3:** Du vælger en spiller, som skal trække 3 kort i træk.
+  - **Træk 3:** Du vælger en spiller, som skal trække 3 kort i træk.
   - **2. chance:** Redder dig én gang fra bust.
   Når du skal vælge en spiller, kommer der en liste frem på din telefon.
 - **Rundens slutning:** Alle ser, hvor mange point de fik, og værten trykker **Næste runde**.
@@ -33,6 +35,6 @@ Målet er at være den første, der når 200 point. Hver runde handler om at tr�
 Skærmen viser hele tiden dine kort, dine point i runden, alles kort og stillingen.
 
 ## Animationer
-Alle telefoner viser med det samme, hvad der sker, og hvem det sker for: **BUST!** med rystelse og et knækket kort, **Frosset!** med sne og is, **Flip 3!** hvor de tre kort vendes ét ad gangen, **2. chance** og **Reddet!**, når den redder dig, konfetti ved **Flip 7** (+15) og når nogen vinder. Når nogen giver et kort til en anden, står der, hvem der gav det til hvem. Tryk på skærmen for at lukke en animation med det samme.
+Alle telefoner viser med det samme, hvad der sker, og hvem det sker for: **BUST!** med rystelse og et knækket kort, **Frosset!** med sne og is, **Træk 3!** hvor de tre kort vendes ét ad gangen, **2. chance** og **Reddet!**, når den redder dig, konfetti ved **SYV!** (7 forskellige tal, +15) og når nogen vinder. Når nogen giver et kort til en anden, står der, hvem der gav det til hvem. Tryk på skærmen for at lukke en animation med det samme.
 
 Tryk på **⚙** øverst til højre for at åbne **Indstillinger** (gælder kun din egen telefon). Under **Animationer** kan du vælge **Fulde**, **Dæmpede** (korte animationer uden rystelser, konfetti og sne) eller **Ingen** (kun en kort tekst om, hvad der skete). Du kan også slå **lyd** og **vibration** til og fra. Vibration virker ikke på iPhone. Har din telefon slået *reducer bevægelse* til, starter animationerne som dæmpede.

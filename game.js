@@ -1,4 +1,4 @@
-/* Flip 7 – ren spillogik (ingen DOM, ingen netværk). Bruges af index.html (vært) og af tests i Node. */
+/* Én til? – ren spillogik (ingen DOM, ingen netværk). Bruges af index.html (vært) og af tests i Node. */
 (function (root) {
   'use strict';
   var MAX_LOG = 40, MAX_EV = 60;
@@ -20,7 +20,7 @@
   function label(c) {
     if (isNum(c)) return c.slice(1);
     if (c[0] === 'm') return '+' + c.slice(1);
-    return { x2: '×2', fr: 'Frys', f3: 'Flip 3', sc: '2. chance' }[c] || c;
+    return { x2: '×2', fr: 'Frys', f3: 'Træk 3', sc: '2. chance' }[c] || c;
   }
   function roundScore(p) {
     if (p.status === 'bust') return 0;
@@ -28,10 +28,10 @@
     for (i = 0; i < p.nums.length; i++) s += p.nums[i];
     if (p.mods.indexOf('x2') >= 0) s *= 2;
     for (i = 0; i < p.mods.length; i++) if (p.mods[i][0] === 'm') s += parseInt(p.mods[i].slice(1), 10);
-    if (p.flip7) s += 15;
+    if (p.seven) s += 15;
     return s;
   }
-  function roundScoreRaw(p) { return roundScore({ status: 'active', nums: p.nums, mods: p.mods, flip7: false }); }
+  function roundScoreRaw(p) { return roundScore({ status: 'active', nums: p.nums, mods: p.mods, seven: false }); }
   function tableCards(p) {
     var c = p.nums.map(function (v) { return 'n' + v; }).concat(p.mods, p.acts);
     if (p.bustCard !== null && p.bustCard !== undefined) c.push('n' + p.bustCard);
@@ -65,7 +65,7 @@
     S.players.push(p); return p;
   }
   function resetPlayerRound(p) {
-    p.nums = []; p.mods = []; p.acts = []; p.status = 'active'; p.sc = false; p.flip7 = false; p.bustCard = null; p.roundPts = 0;
+    p.nums = []; p.mods = []; p.acts = []; p.status = 'active'; p.sc = false; p.seven = false; p.bustCard = null; p.roundPts = 0;
   }
   function startGame(S, rng) {
     if (S.players.length < 2) return { ok: false, err: 'Mindst 2 spillere' };
@@ -82,7 +82,7 @@
       if (p.nums) S.discard.push.apply(S.discard, tableCards(p));
       resetPlayerRound(p);
     });
-    S.round++; S.dealer = (S.dealer + 1) % n; S.phase = 'play'; S.stage = 'deal'; S.turn = -1; S.pending = null; S.flip7End = false; S.tie = false;
+    S.round++; S.dealer = (S.dealer + 1) % n; S.phase = 'play'; S.stage = 'deal'; S.turn = -1; S.pending = null; S.sevenEnd = false; S.tie = false;
     S.queue = [];
     for (var k = 1; k <= n; k++) S.queue.push({ t: 'deal', i: (S.dealer + k) % n });
     log(S, 'Runde ' + S.round + ' – ' + nm(S, S.dealer) + ' giver', 'info');
@@ -97,7 +97,7 @@
     }
     return S.deck.pop();
   }
-  // Giv et kort til spiller i. frame = aktiv Flip 3 (eller null).
+  // Giv et kort til spiller i. frame = aktiv Træk 3 (eller null).
   function give(S, i, card, frame, verb) {
     var p = S.players[i], f3 = frame ? 1 : undefined, deal = verb === 'fik' ? 1 : undefined;
     if (isNum(card)) {
@@ -117,7 +117,7 @@
         p.nums.push(v);
         log(S, nm(S, i) + ' ' + verb + ' ' + v, '');
         ev(S, 'card', { p: i, card: card, f3: f3, deal: deal });
-        if (p.nums.length >= 7) { p.flip7 = true; S.flip7End = true; log(S, nm(S, i) + ' fik Flip 7! +15', 'flip7'); ev(S, 'flip7', { p: i, pts: roundScore(p) }); }
+        if (p.nums.length >= 7) { p.seven = true; S.sevenEnd = true; log(S, nm(S, i) + ' fik 7 forskellige! +15', 'seven'); ev(S, 'seven', { p: i, pts: roundScore(p) }); }
       }
       return;
     }
@@ -129,7 +129,7 @@
       else S.queue.unshift({ t: 'assign', card: 'sc', from: i });
       return;
     }
-    if (frame) { frame.aside.push(card); log(S, label(card) + ' lægges til side til efter Flip 3', 'info'); return; }
+    if (frame) { frame.aside.push(card); log(S, label(card) + ' lægges til side til efter Træk 3', 'info'); return; }
     S.queue.unshift({ t: 'assign', card: card, from: i });
   }
   function candidates(S, card, from) {
@@ -144,9 +144,9 @@
       ev(S, 'freeze', { p: from, t: target, pts: roundScore(tp) });
     } else if (card === 'f3') {
       tp.acts.push('f3');
-      log(S, self ? nm(S, from) + ' tager selv Flip 3' : nm(S, from) + ' giver Flip 3 til ' + tp.name, 'action');
-      ev(S, 'flip3', { p: from, t: target });
-      S.queue.unshift({ t: 'flip3', target: target, left: 3, aside: [] });
+      log(S, self ? nm(S, from) + ' tager selv Træk 3' : nm(S, from) + ' giver Træk 3 til ' + tp.name, 'action');
+      ev(S, 'take3', { p: from, t: target });
+      S.queue.unshift({ t: 'take3', target: target, left: 3, aside: [] });
     } else if (card === 'sc') {
       tp.sc = true; tp.acts.push('sc');
       log(S, nm(S, from) + ' giver 2. chance til ' + tp.name, 'action');
@@ -162,7 +162,7 @@
     var guard = 0;
     while (S.phase === 'play' && !S.pending) {
       if (++guard > 10000) throw new Error('process loop');
-      if (S.flip7End) return endRound(S);
+      if (S.sevenEnd) return endRound(S);
       if (!S.queue.length) {
         var base = S.stage === 'deal' ? S.dealer : S.turn;
         S.stage = 'turns';
@@ -182,7 +182,7 @@
         if (!c.length) { S.discard.push(task.card); log(S, label(task.card) + ' kasseres (ingen kan modtage den)', 'info'); }
         else if (c.length === 1) resolveAssign(S, task.card, task.from, c[0]);
         else S.pending = { card: task.card, chooser: task.from, options: c };
-      } else if (task.t === 'flip3') {
+      } else if (task.t === 'take3') {
         if (!isActive(S, task.target)) { S.queue.shift(); S.discard.push.apply(S.discard, task.aside); continue; }
         if (task.left <= 0) {
           S.queue.shift();
@@ -198,9 +198,9 @@
     }
   }
   function endRound(S) {
-    (S.queue || []).forEach(function (t) { if (t.t === 'flip3') S.discard.push.apply(S.discard, t.aside); if (t.t === 'assign') S.discard.push(t.card); });
+    (S.queue || []).forEach(function (t) { if (t.t === 'take3') S.discard.push.apply(S.discard, t.aside); if (t.t === 'assign') S.discard.push(t.card); });
     if (S.pending) { S.discard.push(S.pending.card); S.pending = null; }
-    S.queue = []; S.turn = -1; S.flip7End = false;
+    S.queue = []; S.turn = -1; S.sevenEnd = false;
     var pts = S.players.map(function (p) { p.roundPts = roundScore(p); p.total += p.roundPts; return p.roundPts; });
     S.history.push(pts);
     log(S, 'Runde ' + S.round + ' er slut', 'info');
@@ -208,7 +208,7 @@
     var max = Math.max.apply(null, S.players.map(function (p) { return p.total; }));
     if (max >= S.target) {
       var lead = []; S.players.forEach(function (p, i) { if (p.total === max) lead.push(i); });
-      if (lead.length === 1) { S.phase = 'over'; S.winners = lead; log(S, S.players[lead[0]].name + ' vinder med ' + max + ' point!', 'flip7'); ev(S, 'win', { p: lead[0], pts: max }); return; }
+      if (lead.length === 1) { S.phase = 'over'; S.winners = lead; log(S, S.players[lead[0]].name + ' vinder med ' + max + ' point!', 'seven'); ev(S, 'win', { p: lead[0], pts: max }); return; }
       S.tie = true; log(S, 'Uafgjort på ' + max + ' point – der spilles en runde mere', 'info');
     }
     S.phase = 'roundEnd';
@@ -245,7 +245,7 @@
   function countCards(S) {
     var n = (S.deck || []).length + (S.discard || []).length;
     S.players.forEach(function (p) { if (p.nums) n += tableCards(p).length; });
-    (S.queue || []).forEach(function (t) { if (t.t === 'flip3') n += t.aside.length; if (t.t === 'assign') n++; });
+    (S.queue || []).forEach(function (t) { if (t.t === 'take3') n += t.aside.length; if (t.t === 'assign') n++; });
     if (S.pending) n++;
     return n;
   }
@@ -261,5 +261,5 @@
     addPlayer: addPlayer, startGame: startGame, startRound: startRound, nextRound: nextRound, act: act, process: process, endRound: endRound,
     canStop: canStop, activeIdx: activeIdx, backToLobby: backToLobby, countCards: countCards, publicView: publicView, drawCard: drawCard };
   api.eventsSince = function (S, id) { return (S.events || []).filter(function (e) { return e.id > id; }); };
-  if (typeof module === 'object' && module.exports) module.exports = api; else root.Flip7 = api;
+  if (typeof module === 'object' && module.exports) module.exports = api; else root.EnTil = api;
 })(this);
