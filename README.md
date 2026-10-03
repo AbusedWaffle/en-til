@@ -11,6 +11,9 @@
 
 Tip: Tryk på del-knappen i browseren og vælg **Føj til hjemmeskærm**, så ligger spillet som en app på telefonen.
 
+## Rangliste
+Forsiden viser spillerne sorteret efter sejre og derefter sejrprocent, med sidst kendte navn, antal spil, sejre og sejrprocent. Når et spil er vundet, vises placeringen fra 1. til sidst. Hver telefon gemmer kun sin egen række (navnet fra det spil, spil og sejre). AI-modstandere skrives ikke op og har ingen karriere på listen.
+
 ## Det skal I være opmærksomme på
 - **Værtens telefon holder spillet i gang.** Værten skal have spillet åbent og skærmen tændt. Hvis værtens telefon låser eller lukker spillet, går spillet i stå for alle, indtil værten åbner det igen. Så fortsætter det, hvor I slap.
 - **Alle skal have internet.** Det er sikrest, at alle er på samme wifi.

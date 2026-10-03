@@ -93,6 +93,7 @@
     normalizeRules(S);
     S.deck = shuffle(buildDeck(S.deckMax, S.specials, S.chance), rng); S.discard = [];
     S.players.forEach(function (p) { p.total = 0; resetPlayerRound(p); });
+    S.matchId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
     log(S, 'Spillet starter! Mål: ' + S.target + ' point', 'info');
     startRound(S, rng);
     return { ok: true };
@@ -405,10 +406,58 @@
     return aiHit(S, S.turn);
   }
 
+  // Placering i det spil der lige er vundet. Lige point deler plads.
+  function gameRanking(players) {
+    var rows = (players || []).map(function (p, i) {
+      return { i: i, id: p.id, name: p.name, total: p.total | 0, ai: !!p.ai };
+    });
+    rows.sort(function (a, b) {
+      if (b.total !== a.total) return b.total - a.total;
+      return String(a.name || '').localeCompare(String(b.name || ''), 'da');
+    });
+    var place = 0, last = null;
+    rows.forEach(function (r, n) {
+      if (last === null || r.total !== last) place = n + 1;
+      last = r.total;
+      r.place = place;
+    });
+    return rows;
+  }
+  function winPercent(wins, games) {
+    wins = wins | 0; games = games | 0;
+    if (games <= 0 || wins <= 0) return 0;
+    if (wins > games) wins = games;
+    return Math.round((wins / games) * 1000) / 10;
+  }
+  function formatPercent(p) {
+    var n = Math.round(Number(p) * 10) / 10;
+    if (!isFinite(n) || n < 0) n = 0;
+    var s = Math.round(n) === n ? String(Math.round(n)) : n.toFixed(1).replace('.', ',');
+    return s + ' %';
+  }
+  // Én afsluttet kamp for denne telefon. games +1, wins +1 kun ved sejr. Navn er det, der blev spillet som.
+  function nextCareer(prev, won, name) {
+    var games = ((prev && prev.games) | 0) + 1;
+    var wins = ((prev && prev.wins) | 0) + (won ? 1 : 0);
+    if (wins > games) wins = games;
+    if (wins < 0) wins = 0;
+    name = String(name == null ? '' : name).trim().slice(0, 40);
+    return { name: name, games: games, wins: wins };
+  }
+  function sortBoard(rows) {
+    return (rows || []).slice().sort(function (a, b) {
+      var dw = (b.wins | 0) - (a.wins | 0);
+      if (dw) return dw;
+      var dp = winPercent(b.wins, b.games) - winPercent(a.wins, a.games);
+      if (dp) return dp;
+      return String(a.name || '').localeCompare(String(b.name || ''), 'da');
+    });
+  }
+
   var api = { buildDeck: buildDeck, shuffle: shuffle, label: label, roundScore: roundScore, tableCards: tableCards, createLobby: createLobby,
     addPlayer: addPlayer, startGame: startGame, startRound: startRound, nextRound: nextRound, act: act, process: process, endRound: endRound,
     canStop: canStop, activeIdx: activeIdx, backToLobby: backToLobby, countCards: countCards, publicView: publicView, drawCard: drawCard,
-    normalizeRules: normalizeRules, defaultSpecials: defaultSpecials, aiDecide: aiDecide, pickAiNames: pickAiNames, AI_NAMES: AI_NAMES };
+    normalizeRules: normalizeRules, defaultSpecials: defaultSpecials, aiDecide: aiDecide, pickAiNames: pickAiNames, AI_NAMES: AI_NAMES, gameRanking: gameRanking, winPercent: winPercent, formatPercent: formatPercent, nextCareer: nextCareer, sortBoard: sortBoard };
   api.eventsSince = function (S, id) { return (S.events || []).filter(function (e) { return e.id > id; }); };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.EnTil = api;
 })(this);

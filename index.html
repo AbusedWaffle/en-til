@@ -280,6 +280,15 @@ body.anim-none #fx,body.anim-none .floaty,body.anim-none .flyer{display:none!imp
 .seg.every button{padding:10px 0;font-size:15px}
 #everyHint{margin:6px 0 0}
 @keyframes fadeq{0%,100%{opacity:0}20%,80%{opacity:1}}
+.rankrow{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #2b3d63}
+.rankrow:last-child{border-bottom:0}
+.rankrow .place{width:28px;flex:none;font-weight:900;color:#ffcf40;font-size:18px}
+.rankrow .grow{flex:1;min-width:0}
+.rankrow .pts{font-weight:900;font-size:18px;flex:none}
+.career{color:#9fb0d0;font-size:12px;font-weight:600;line-height:1.35;margin-top:2px}
+.boardrow{align-items:flex-start}
+.boardrow .place{width:22px;font-weight:900;color:#ffcf40}
+.boardrow .stat{font-size:12px;font-weight:700;color:#c5d2ea;text-align:right;max-width:118px;line-height:1.3}
 </style></head><body>
 <header><h1>FLIP<span>X</span></h1><div class="pill" id="pill"><span class="dot"></span>Offline</div><button class="gear" id="gear" aria-label="Indstillinger" onclick="openSettings()">⚙</button></header>
 <main><div id="app"></div><footer class="disc" id="disc">Uofficiel fan-lavet version. Ikke tilknyttet eller godkendt af The Op / USAOPOLY. Kræver ikke det fysiske spil.</footer></main>
@@ -400,6 +409,7 @@ function saveHost() { if (S && room) LS.set('host-' + room, S); }
 function hostCreate(name, target) {
   role = 'host'; room = genCode(); freshHost = true; myName = name;
   S = G.createLobby(target); G.addPlayer(S, myId, name);
+  if (window.flipUid) setFuid(S.players[0], window.flipUid);
   LS.set('session', { room, role: 'host' }); saveHost();
   startHostPeer(); publish();
 }
@@ -457,7 +467,11 @@ function onHostData(c, d) {
     }
     const old = conns[pid]; conns[pid] = c; c.pid = pid; p.online = true;
     if (old && old !== c) try { old.close(); } catch (e) {}
+    setFuid(p, d.uid);
     publish();
+  } else if (d.t === 'uid' && c.pid && conns[c.pid] === c) {
+    const p = S.players.find(x => x.id === c.pid);
+    if (setFuid(p, d.uid)) publish();
   } else if (d.t === 'intent' && c.pid && conns[c.pid] === c) {
     const r = G.act(S, c.pid, { a: d.a, target: d.target, num: d.num });
     if (!r.ok) send(c, { t: 'err', msg: r.err });
@@ -556,7 +570,7 @@ function connectToHost() {
   lastEv = null; // efter (gen)forbindelse afspilles gamle hændelser ikke
   const c = hostConn = peer.connect('flipx-' + room, { reliable: true, metadata: { pid: myId } });
   const to = setTimeout(() => { if (hostConn === c && !c.open) { hostConn = null; try { c.close(); } catch (e) {} connState = 'lost'; if (!errMsg) errMsg = 'Kan ikke nå værten. Prøver igen…'; render(); scheduleReconnect(); } }, 9000);
-  c.on('open', () => { if (hostConn !== c) return; clearTimeout(to); connState = 'online'; errMsg = ''; lastMsg = Date.now(); send(c, { t: 'hello', pid: myId, name: myName }); render(); });
+  c.on('open', () => { if (hostConn !== c) return; clearTimeout(to); connState = 'online'; errMsg = ''; lastMsg = Date.now(); send(c, { t: 'hello', pid: myId, name: myName, uid: window.flipUid || '' }); render(); });
   c.on('data', d => { if (hostConn === c) onClientData(d); });
   const lost = () => { if (hostConn !== c) return; clearTimeout(to); hostConn = null; if (rejected) return; connState = 'lost'; errMsg = errMsg || 'Forbindelsen til værten er tabt. Prøver igen…'; render(); scheduleReconnect(); };
   c.on('close', lost); c.on('error', lost);
@@ -883,6 +897,7 @@ function render() {
   if (view.phase === 'lobby') { stopAi(); return renderLobby(); }
   fxBig = fresh.some(e => FX_BIG[e.type]);
   renderGame();
+  if (view.phase === 'over') kickRecord();
   if (fresh.length) playEvents(fresh, view);
   scheduleAi();
 }
@@ -897,6 +912,7 @@ function renderHome() {
   let h = '';
   if (errMsg && rejected) h += `<div class="err">${esc(errMsg)}</div>`;
   h += `<div class="card"><div class="lbl" style="margin-top:0">Dit navn</div><input type="text" id="name" maxlength="16" autocomplete="off" placeholder="Fx Emil" value="${esc(myName)}"></div>`;
+  h += boardHtml();
   const join = `<div class="card"><h3 style="margin:0 0 4px">${qroom ? 'Deltag i spil' : 'Deltag i et spil'}</h3><div class="lbl">Spilkode</div><input type="text" id="code" maxlength="5" autocomplete="off" autocapitalize="characters" placeholder="ABCDE" value="${esc(qroom)}"><button class="primary" id="btnJoin" style="margin-top:12px" onclick="doJoin()">Deltag</button></div>`;
   const create = `<div class="card"><h3 style="margin:0 0 4px">Opret nyt spil</h3><div class="hint">Din telefon bliver vært. Hold den tændt og med appen åben under spillet.</div><div class="lbl">Spil til (point)</div><input type="number" id="tgt" inputmode="numeric" value="200"><button class="primary" id="btnCreate" style="margin-top:12px" onclick="doCreate()">Opret spil</button></div>`;
   if (sess && !qroom && !rejected) h += `<div class="card"><button class="ghost" style="width:100%" onclick="location.href='${esc(linkFor(sess.room))}'">↻ Genoptag spil ${esc(sess.room)}</button></div>`;
@@ -985,15 +1001,114 @@ function renderGame() {
     sh.innerHTML = `<h2>Du trak ${cardHtml(P.card).replace('class="c', 'class="c" style="width:34px;height:46px;font-size:18px;vertical-align:middle').replace(/<i>.*<\/i>/, '')} ${CARD_NAME[P.card]}</h2><p class="hint">${CARD_DESC[P.card]} Vælg en spiller:</p><div class="pick" id="pick">` +
       P.options.map(i => `<button data-t="${i}" ${sending ? 'disabled' : ''} onclick="hostAct({a:'choose',target:${i}})"><span>${esc(v.players[i].name)}${i === meIdx ? ' (dig selv)' : ''}</span><b>${G.roundScore(v.players[i])} p</b></button>`).join('') + '</div>';
     m.classList.add('show');
-  } else if (v.phase === 'roundEnd' || v.phase === 'over') {
+  } else if (v.phase === 'over') {
+    const ranked = G.gameRanking(v.players);
+    const winner = v.players[v.winners[0]];
+    let s = `<div class="win" id="winline">🏆 ${esc(winner.name)} vinder med ${winner.total} point!</div>`;
+    s += '<div id="ranking">' + ranked.map(r => {
+      const p = v.players[r.i];
+      const ai = !!p.ai;
+      const label = ai ? String(p.name).replace(/ \(AI\)$/, '') : p.name;
+      const uid = ai ? '' : (p.fuid || (p.id === myId ? window.flipUid : '') || '');
+      const st = uid && career[uid];
+      const sub = ai ? '' : (st ? `<div class="career">${st.games} spil · ${st.wins} sejre · ${G.formatPercent(G.winPercent(st.wins, st.games))}<div>Sidst kendt som ${esc(st.name)}</div></div>` : '<div class="career">Karriere hentes…</div>');
+      return `<div class="rankrow"><span class="place">${r.place}.</span><div class="grow"><b>${esc(label)}</b>${ai ? ' <span class="ain">(AI)</span>' : ''}${sub}</div><span class="pts">${p.total}</span></div>`;
+    }).join('') + '</div>';
+    if (role === 'host') s += `<button class="primary" id="btnNew" onclick="hostNewGame()">Nyt spil</button>`;
+    else s += `<p class="hint" style="text-align:center">Venter på at ${esc(v.players[0].name)} starter et nyt spil…</p>`;
+    sh.innerHTML = s; m.classList.add('show');
+  } else if (v.phase === 'roundEnd') {
     const order = v.players.map((p, i) => i).sort((a, b) => v.players[b].total - v.players[a].total);
-    let s = v.phase === 'over' ? `<div class="win">🏆 ${esc(v.players[v.winners[0]].name)} vinder med ${v.players[v.winners[0]].total} point!</div>` : `<h2>Runde ${v.round} er slut</h2>`;
+    let s = `<h2>Runde ${v.round} er slut</h2>`;
     if (v.tie) s += '<p class="hint">Uafgjort i toppen – der spilles en runde mere.</p>';
     s += '<table id="summary"><tr><th>Spiller</th><th>Runde</th><th style="text-align:right">Point</th><th style="text-align:right">Total</th></tr>' + order.map(i => { const p = v.players[i]; return `<tr><td><b>${esc(p.name)}</b><div class="sm">${handHtml(p, false)}</div></td><td>${statusChip(p)}</td><td class="n" style="color:${p.roundPts ? '#fff' : '#e0485f'}">+${p.roundPts}</td><td class="n" style="font-size:20px">${p.total}</td></tr>`; }).join('') + '</table>';
     if (role === 'host') s += v.phase === 'over' ? `<button class="primary" id="btnNew" onclick="hostNewGame()">Nyt spil</button>` : `<button class="primary" id="btnNext" style="height:60px;font-size:20px" onclick="hostNext()">Næste runde</button>`;
     else s += `<p class="hint" style="text-align:center">Venter på at ${esc(v.players[0].name)} ${v.phase === 'over' ? 'starter et nyt spil' : 'starter næste runde'}…</p>`;
     sh.innerHTML = s; m.classList.add('show');
   } else m.classList.remove('show');
+}
+
+// ---------- rangliste ----------
+let career = {};
+let boardRows = null;
+let boardError = false;
+let recordBusy = '';
+let careersKey = '';
+function validUid(u) { return typeof u === 'string' && /^[A-Za-z0-9_-]{8,128}$/.test(u); }
+function setFuid(p, uid) {
+  if (!p || p.ai || !validUid(uid) || p.fuid === uid) return false;
+  p.fuid = uid; return true;
+}
+function boardHtml() {
+  const rows = boardRows ? G.sortBoard(boardRows) : null;
+  let body;
+  if (boardError) body = '<div class="hint">Rangliste kan ikke hentes lige nu. Spillet virker alligevel.</div>';
+  else if (!rows) body = '<div class="hint">Henter rangliste…</div>';
+  else if (!rows.length) body = '<div class="hint">Ingen spil endnu. Listen fyldes, når nogen har vundet et spil.</div>';
+  else body = rows.map((r, i) => `<div class="pl boardrow"><span class="place">${i + 1}</span><span class="grow"><b>${esc(r.name || 'Spiller')}</b>${r.id === window.flipUid ? ' <span class="dig">Dig</span>' : ''}<div class="career">${r.wins} sejre · ${r.games} spil · ${G.formatPercent(G.winPercent(r.wins, r.games))}</div></span></div>`).join('');
+  return `<div class="card" id="boardCard"><div class="lbl" style="margin-top:0">Rangliste</div><div id="boardList">${body}</div><div class="hint">Sidst kendte navn, sejre, spil og sejrprocent. AI tæller ikke med.</div></div>`;
+}
+function loadHomeBoard() {
+  if (!window.FlipLive) return;
+  window.FlipLive.loadBoard().then(rows => {
+    boardRows = rows || []; boardError = false;
+    if (!role || rejected) renderHome();
+  }).catch(() => { boardError = true; boardRows = boardRows || []; if (!role || rejected) renderHome(); });
+}
+function attachUid() {
+  const uid = window.flipUid;
+  if (!validUid(uid)) return;
+  if (role === 'host' && S) {
+    const me = S.players.find(p => p.id === myId);
+    if (setFuid(me, uid)) publish();
+  } else if (role === 'client' && hostConn && hostConn.open) send(hostConn, { t: 'uid', uid: uid });
+}
+window.onFlipUid = function (uid) {
+  window.flipUid = uid;
+  LS.set('uid', uid);
+  attachUid();
+  if (!role || rejected) loadHomeBoard();
+  else if (view && view.phase === 'over') render();
+};
+window.onFlipBoardFail = function () {
+  boardError = true; boardRows = boardRows || [];
+  if (!role || rejected) renderHome();
+};
+function careerUids(v) {
+  const u = [];
+  v.players.forEach(p => { if (!p.ai && validUid(p.fuid) && u.indexOf(p.fuid) < 0) u.push(p.fuid); });
+  if (validUid(window.flipUid) && u.indexOf(window.flipUid) < 0) u.push(window.flipUid);
+  return u;
+}
+function ensureCareers() {
+  if (!window.FlipLive || !view || view.phase !== 'over') return;
+  const key = (view.matchId || '') + ':' + careerUids(view).join(',');
+  if (careersKey === key) return;
+  careersKey = key;
+  const mine = window.flipUid;
+  const recorded = LS.get('recorded', '') === (room + ':' + (view.matchId || ''));
+  window.FlipLive.loadPlayers(careerUids(view)).then(map => {
+    Object.keys(map || {}).forEach(id => {
+      if (recorded && id === mine && career[id]) return;
+      career[id] = map[id];
+    });
+    if (view && view.phase === 'over') render();
+  }).catch(() => {});
+}
+function kickRecord() {
+  if (!view || view.phase !== 'over' || !window.FlipLive || !view.matchId) return;
+  ensureCareers();
+  const key = room + ':' + view.matchId;
+  if (LS.get('recorded', '') === key || recordBusy === key) return;
+  const me = view.players.find(p => p.id === myId);
+  if (!me || me.ai || !validUid(window.flipUid)) return;
+  recordBusy = key;
+  const won = (view.winners || []).some(i => view.players[i] && view.players[i].id === myId);
+  window.FlipLive.record(window.flipUid, me.name, won).then(next => {
+    LS.set('recorded', key);
+    career[window.flipUid] = next;
+    if (view && view.phase === 'over') render();
+  }).catch(e => { recordBusy = ''; console.warn('kunne ikke gemme karriere', e && e.message ? e.message : e); });
 }
 
 // ---------- start ----------
@@ -1004,4 +1119,6 @@ function renderGame() {
   else if (qroom && sess && sess.room === qroom && sess.role === 'client' && myName) clientJoin(qroom, myName);
   else render();
 })();
-</script></body></html>
+</script>
+<script type="module" src="board.js"></script>
+</body></html>
