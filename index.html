@@ -5,17 +5,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Én til?">
+<meta name="apple-mobile-web-app-title" content="FlipX">
 <meta name="theme-color" content="#10192e">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
-<title>Én til? online</title>
+<title>FlipX online</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;background:#10192e;color:#fff;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);overscroll-behavior:none;-webkit-user-select:none;user-select:none}
-header{display:flex;align-items:center;gap:8px;padding:10px 14px;max-width:560px;margin:auto}
+header{display:flex;align-items:center;gap:8px;padding:10px 14px;max-width:560px;margin:auto;position:relative;z-index:25}
 h1{margin:0;font-size:22px;letter-spacing:1px;flex:1}h1 span{color:#ffcf40}
 .pill{font-size:12px;padding:5px 10px;border-radius:20px;background:#1b2a4a;color:#9fb0d0;display:flex;align-items:center;gap:6px;white-space:nowrap}
 .dot{width:9px;height:9px;border-radius:50%;background:#6b7a99;display:inline-block;flex:none}
@@ -55,7 +55,7 @@ button:disabled{opacity:.35}
 .pr .nm b{overflow:hidden;text-overflow:ellipsis}
 .dig{flex:none;font-size:10px;font-weight:800;background:#10192ecc;color:#fff;border-radius:8px;padding:1px 5px;line-height:1.4}
 .pr.turn .dig{background:#0b3d1ccc}
-.meta{display:flex;gap:4px;align-items:center;min-width:0;overflow:hidden}
+.meta{display:flex;gap:4px;align-items:center;flex-wrap:wrap;min-width:0}
 .giver{font-size:10px;font-weight:800;color:#ffcf40;white-space:nowrap}
 .pr.turn .giver{color:#fff6c2}
 .offsmall{font-size:10px;font-weight:700;color:#ffb3c0}
@@ -65,10 +65,10 @@ button:disabled{opacity:.35}
 .pr .sm{grid-column:1 / -1;margin-top:4px}
 .grid .sm .c{width:42px;height:56px;font-size:24px;border-radius:7px}
 .grid .sm .c.mod{font-size:16px}
-.grid .sm .c.fr,.grid .sm .c.f3,.grid .sm .c.sc{font-size:18px}
+.grid .sm .c.fr,.grid .sm .c.f3,.grid .sm .c.sc,.grid .sm .c.et,.grid .sm .c.gv,.grid .sm .c.pa{font-size:16px}
 .grid.mid .sm .c{width:34px;height:46px;font-size:18px}
 .grid.mid .sm .c.mod{font-size:13px}
-.grid.mid .sm .c.fr,.grid.mid .sm .c.f3,.grid.mid .sm .c.sc{font-size:15px}
+.grid.mid .sm .c.fr,.grid.mid .sm .c.f3,.grid.mid .sm .c.sc,.grid.mid .sm .c.et,.grid.mid .sm .c.gv,.grid.mid .sm .c.pa{font-size:13px}
 .grid.crowded .sm .c{width:23px;height:31px;font-size:14px}
 .grid.crowded .sm .c.mod{font-size:11px}
 .grid.crowded .pr .pts{font-size:22px}
@@ -85,11 +85,14 @@ body.ingame .disc{margin:6px 4px 0;padding-bottom:2px}
 .c.fr{background:#7fd8ff;color:#0b3550;font-size:24px}
 .c.f3{background:#ffcf40;color:#10192e;font-size:24px}
 .c.sc{background:#e0485f;color:#fff;font-size:24px}
+.c.et{background:#3ddc84;color:#0b2a1a;font-size:24px}
+.c.gv{background:#b28dff;color:#1b1030;font-size:22px}
+.c.pa{background:#d7e4f5;color:#1a3350;font-size:22px}
 .c.dup{outline:3px solid #e0485f;background:#ffd6dc;color:#b0102a}
 .c.pop{animation:pop .45s ease-out}
 @keyframes pop{0%{transform:scale(.3) rotate(-12deg);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1)}}
 .sm .c{width:24px;height:33px;font-size:14px;border-radius:5px;box-shadow:none}
-.sm .c.mod{font-size:11px}.sm .c.fr,.sm .c.f3,.sm .c.sc{font-size:12px}
+.sm .c.mod{font-size:11px}.sm .c.fr,.sm .c.f3,.sm .c.sc,.sm .c.et,.sm .c.gv,.sm .c.pa{font-size:12px}
 .sm .c i{display:none}
 .sm{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
 .n0{color:#555}.n1{color:#8a6d3b}.n2{color:#2e8b57}.n3{color:#c0392b}.n4{color:#2471a3}.n5{color:#16a085}.n6{color:#8e44ad}.n7{color:#d35400}.n8{color:#27ae60}.n9{color:#b7950b}.n10{color:#c2185b}.n11{color:#1a5276}.n12{color:#6c3483}
@@ -175,7 +178,7 @@ td.n{text-align:right;font-weight:800}
 #fx .vis{height:150px;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;position:relative}
 .c.big{width:78px;height:112px;font-size:50px;border-radius:12px;box-shadow:0 6px 18px #0009}
 .c.big i{font-size:12px}
-.c.big.mod{font-size:34px}.c.big.fr,.c.big.f3,.c.big.sc{font-size:40px}
+.c.big.mod{font-size:34px}.c.big.fr,.c.big.f3,.c.big.sc,.c.big.et,.c.big.gv,.c.big.pa{font-size:36px}
 /* BUST */
 #fx.bust{background:radial-gradient(circle at 50% 45%,#e0485ff4,#5a0f1ffa 60%,#10192efc);color:#fff;animation:fxin .15s,redflash .6s}
 @keyframes redflash{0%{background-color:#fff}15%{background-color:#ff2d4d}}
@@ -209,6 +212,13 @@ td.n{text-align:right;font-weight:800}
 .c.big.saved{outline:4px solid #8ff0c0}
 /* 2. chance / reddet */
 #fx.sc,#fx.save{background:radial-gradient(circle at 50% 45%,#8a1f3af6,#10192efc 70%);color:#fff}
+#fx.pause{background:#152848;color:#fff}
+#fx.extra,#fx.give{background:radial-gradient(circle at 50% 45%,#1d3a66f6,#10192efc 72%);color:#fff}
+#fx.pause .ttl,#fx.extra .ttl,#fx.give .ttl{color:#fff;text-shadow:0 4px 0 #0c2244}
+.specs{display:flex;flex-wrap:wrap;gap:6px}
+.specs button{padding:8px 10px;font-size:14px;background:#0d1628;color:#cfd9ee}
+.specs button.on{background:#ffcf40;color:#10192e}
+.seg.deck button{flex:1;padding:12px 4px}
 #fx.sc .ttl,#fx.save .ttl{color:#fff;text-shadow:0 4px 0 #7a0f22,0 0 26px #ff6b86}
 .shield{width:120px;height:120px;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;background:radial-gradient(circle at 50% 35%,#ff8aa0,#e0485f 60%,#9b1330);display:flex;align-items:center;justify-content:center;font-size:64px;color:#fff;box-shadow:0 0 0 6px #ffffff33,0 0 40px 10px #ff6b8699;animation:icein .7s cubic-bezier(.2,1.3,.4,1) both,shglow 1s .7s ease-in-out infinite alternate}
 @keyframes shglow{to{box-shadow:0 0 0 10px #ffffff22,0 0 60px 20px #ff6b86cc}}
@@ -262,7 +272,7 @@ body.anim-none #fx,body.anim-none .floaty{display:none!important}
 #everyHint{margin:6px 0 0}
 @keyframes fadeq{0%,100%{opacity:0}20%,80%{opacity:1}}
 </style></head><body>
-<header><h1>ÉN <span>TIL?</span></h1><div class="pill" id="pill"><span class="dot"></span>Offline</div><button class="gear" id="gear" aria-label="Indstillinger" onclick="openSettings()">⚙</button></header>
+<header><h1>FLIP<span>X</span></h1><div class="pill" id="pill"><span class="dot"></span>Offline</div><button class="gear" id="gear" aria-label="Indstillinger" onclick="openSettings()">⚙</button></header>
 <main><div id="app"></div><footer class="disc" id="disc">Uofficiel fan-lavet version. Ikke tilknyttet eller godkendt af The Op / USAOPOLY. Kræver ikke det fysiske spil.</footer></main>
 <div class="bottom" id="bottom" style="display:none"></div>
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
@@ -300,13 +310,14 @@ function linkFor(room) {
   return location.origin + location.pathname + '?' + p.toString();
 }
 const STATUS = { active: 'Aktiv', stopped: 'Stoppet', bust: 'Bust', frozen: 'Frosset' };
-const CARD_NAME = { fr: 'Frys', f3: 'Træk 3', sc: '2. chance' };
-const CARD_DESC = { fr: 'Spilleren banker sine point og er ude af runden.', f3: 'Spilleren skal vende de næste 3 kort ét ad gangen.', sc: 'Du har allerede en 2. chance – giv denne til en anden aktiv spiller.' };
+const CARD_NAME = { fr: 'Frys', f3: 'Træk 3', sc: '2. chance', et: 'Ekstra træk', gv: 'Giv væk', pa: 'Pause' };
+const CARD_DESC = { fr: 'Spilleren banker sine point og er ude af runden.', f3: 'Spilleren skal vende de næste 3 kort ét ad gangen.', sc: 'Du har allerede en 2. chance – giv denne til en anden aktiv spiller.', et: 'Du trækker ét kort mere med det samme.', gv: 'Giv et af dine talkort til en anden spiller. Har de tallet i forvejen, går de bust.', pa: 'Du springes over én gang. Du bliver i runden og kan trække igen bagefter.' };
+const SPEC_LIST = [['fr','Frys'],['f3','Træk 3'],['sc','2. chance'],['et','Ekstra træk'],['gv','Giv væk'],['pa','Pause']];
 
 // ---------- tilstand ----------
 let role = null, room = null, peer = null, S = null, view = null, conns = {}, hostConn = null;
 let connState = 'offline', errMsg = '', myName = LS.get('name', ''), rejected = false, lastMsg = 0, reconnTimer = null, freshHost = false;
-let lastSeq = null, wasMyTurn = false, sending = false, lastEv = null;
+let lastSeq = null, wasMyTurn = false, sending = false, lastEv = null, gvNum = null;
 
 // ---------- indstillinger (kun denne enhed, gemmes i f7o-settings, sendes aldrig over nettet) ----------
 const RM = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
@@ -392,7 +403,7 @@ function resumeHost(code) {
 function startHostPeer() {
   if (peer) try { peer.destroy(); } catch (e) {}
   connState = 'connecting'; render();
-  const pr = peer = new Peer('entil-' + room, peerOpts());
+  const pr = peer = new Peer('flipx-' + room, peerOpts());
   pr.on('open', () => {
     if (pr !== peer) return;
     connState = 'online'; errMsg = ''; freshHost = false;
@@ -439,7 +450,7 @@ function onHostData(c, d) {
     if (old && old !== c) try { old.close(); } catch (e) {}
     publish();
   } else if (d.t === 'intent' && c.pid && conns[c.pid] === c) {
-    const r = G.act(S, c.pid, { a: d.a, target: d.target });
+    const r = G.act(S, c.pid, { a: d.a, target: d.target, num: d.num });
     if (!r.ok) send(c, { t: 'err', msg: r.err });
     publish();
   }
@@ -464,7 +475,7 @@ setInterval(() => {
 }, 3000);
 function hostAct(a) {
   if (role === 'host') { const r = G.act(S, myId, a); if (!r.ok) toast(r.err); publish(); }
-  else { if (!hostConn || !hostConn.open) return toast('Ingen forbindelse til værten'); send(hostConn, { t: 'intent', a: a.a, target: a.target }); sending = true; render(); }
+  else { if (!hostConn || !hostConn.open) return toast('Ingen forbindelse til værten'); send(hostConn, { t: 'intent', a: a.a, target: a.target, num: a.num }); sending = true; render(); }
 }
 function hostActFor(pid, a) { if (role !== 'host') return; const r = G.act(S, pid, a); if (!r.ok) toast(r.err); publish(); }
 function hostStart() { const t = parseInt(($('target') || {}).value, 10); if (t > 0) S.target = t; const r = G.startGame(S); if (!r.ok) return toast(r.err); publish(); }
@@ -472,6 +483,8 @@ function hostNext() { G.nextRound(S); publish(); }
 function hostNewGame() { G.backToLobby(S); publish(); }
 function hostKick(pid) { const i = S.players.findIndex(p => p.id === pid); if (i <= 0 || S.phase !== 'lobby') return; const c = conns[pid]; if (c) { send(c, { t: 'reject', reason: 'Værten fjernede dig fra spillet.' }); delete conns[pid]; setTimeout(() => c.close(), 500); } S.players.splice(i, 1); publish(); }
 function hostTarget(v) { const t = parseInt(v, 10); if (t > 0 && S.phase === 'lobby') { S.target = t; publish(); } }
+function hostDeck(n) { n = +n; if (role !== 'host' || !S || S.phase !== 'lobby' || [8,12,16].indexOf(n) < 0) return; S.deckMax = n; publish(); }
+function hostSpec(k) { if (role !== 'host' || !S || S.phase !== 'lobby' || !S.specials || !(k in S.specials)) return; S.specials[k] = !S.specials[k]; publish(); }
 
 // ---------- KLIENT ----------
 function clientJoin(code, name) {
@@ -500,7 +513,7 @@ function connectToHost() {
   if (hostConn) { const o = hostConn; hostConn = null; try { o.close(); } catch (e) {} }
   connState = connState === 'online' ? 'connecting' : connState === 'lost' ? 'lost' : 'connecting';
   lastEv = null; // efter (gen)forbindelse afspilles gamle hændelser ikke
-  const c = hostConn = peer.connect('entil-' + room, { reliable: true, metadata: { pid: myId } });
+  const c = hostConn = peer.connect('flipx-' + room, { reliable: true, metadata: { pid: myId } });
   const to = setTimeout(() => { if (hostConn === c && !c.open) { hostConn = null; try { c.close(); } catch (e) {} connState = 'lost'; if (!errMsg) errMsg = 'Kan ikke nå værten. Prøver igen…'; render(); scheduleReconnect(); } }, 9000);
   c.on('open', () => { if (hostConn !== c) return; clearTimeout(to); connState = 'online'; errMsg = ''; lastMsg = Date.now(); send(c, { t: 'hello', pid: myId, name: myName }); render(); });
   c.on('data', d => { if (hostConn === c) onClientData(d); });
@@ -542,7 +555,7 @@ function leave() {
 }
 
 // ---------- animationer (hændelser fra værten: view.events med stigende id) ----------
-const FX_BIG = { bust: 1, freeze: 1, take3: 1, save: 1, sc: 1, seven: 1, win: 1 };
+const FX_BIG = { bust: 1, freeze: 1, take3: 1, save: 1, sc: 1, seven: 1, win: 1, pause: 1, extra: 1, give: 1 };
 let fxBig = false, fxQ = [], fxCur = null, fxTimer = null, fxOutT = null;
 // Nye hændelser siden sidst. Første visning (join, genindlæsning, genforbindelse) springer gamle hændelser over.
 function takeEvents(v) {
@@ -568,9 +581,12 @@ const SFX = {
   save: () => { tone(500, 0, 0.15, 'triangle', 0.07); tone(990, 0.15, 0.3, 'triangle', 0.07); },
   sc: () => tone(660, 0, 0.35, 'sine', 0.07, 990),
   seven: () => [523, 659, 784, 1047, 1319].forEach((f, k) => tone(f, k * 0.09, 0.3, 'triangle', 0.07)),
-  win: () => [523, 659, 784, 1047, 784, 1047].forEach((f, k) => tone(f, k * 0.12, 0.35, 'triangle', 0.07))
+  win: () => [523, 659, 784, 1047, 784, 1047].forEach((f, k) => tone(f, k * 0.12, 0.35, 'triangle', 0.07)),
+  pause: () => tone(440, 0, 0.25, 'sine', 0.06, 330),
+  extra: () => tone(700, 0, 0.18, 'triangle', 0.07, 980),
+  give: () => tone(520, 0, 0.2, 'triangle', 0.07, 680)
 };
-const VIB_ME = { bust: [60, 40, 60, 40, 260], freeze: [30, 60, 30, 60, 30], take3: [40, 400, 40, 400, 40], save: [40, 60, 120], sc: [40, 60, 40], seven: [100, 50, 100, 50, 300], win: [100, 50, 100, 50, 300] };
+const VIB_ME = { bust: [60, 40, 60, 40, 260], freeze: [30, 60, 30, 60, 30], take3: [40, 400, 40, 400, 40], save: [40, 60, 120], sc: [40, 60, 40], seven: [100, 50, 100, 50, 300], win: [100, 50, 100, 50, 300], pause: [40, 80, 40], extra: [30, 40, 30], give: [40, 60, 40] };
 function fxEsc(v, i, subj) { const meIdx = v.players.findIndex(p => p.id === myId); return i === meIdx ? (subj ? 'Du' : 'dig') : esc((v.players[i] || {}).name || '?'); }
 function flakes(n) { let h = ''; for (let k = 0; k < n; k++) h += `<span class="flake" style="--x:${Math.random() * 100}%;--s:${14 + Math.random() * 22}px;--d:${1.3 + Math.random() * 1.2}s;--dl:${Math.random() * 0.6}s;--sx:${(Math.random() - 0.5) * 80}px">❄</span>`; return h; }
 function confetti(n) { const C = ['#ffcf40', '#e0485f', '#7fd8ff', '#3ddc84', '#ffffff', '#ff8a3d', '#b28dff']; let h = ''; for (let k = 0; k < n; k++) { const bx = (Math.random() - 0.5) * 380; h += `<span class="conf" style="--c:${C[k % C.length]};--d:${2.2 + Math.random() * 1.2}s;--dl:${Math.random() * 0.25}s;--bx:${bx}px;--by:${-120 - Math.random() * 260}px;--sx:${bx * 1.5}px;--r:${(Math.random() - 0.5) * 1440}deg"></span>`; } return h; }
@@ -606,6 +622,15 @@ function fxHtml(o, v) {
     case 'win': return {
       dur: 2600, html: `${confetti(reducedFx() ? 0 : 90)}<div class="vis"><div class="trophy">🏆</div></div><div class="ttl" style="font-size:clamp(40px,13vw,64px)">${Su(e.p)} vinder!</div>
       <div class="sub">${e.pts} point</div>` };
+    case 'pause': return {
+      dur: 1500, html: `<div class="vis"><div class="ice" style="font-size:84px">Ⅱ</div></div><div class="ttl" style="font-size:clamp(40px,13vw,68px)">Pause!</div>
+      <div class="sub">${Su(e.p)} springes over én gang</div><div class="sm2">Bliver i runden og kan trække igen bagefter</div>` };
+    case 'extra': return {
+      dur: 1200, html: `<div class="vis"><span class="c big et">+<i>EKSTRA</i></span></div><div class="ttl" style="font-size:clamp(36px,11vw,60px)">Ekstra træk!</div>
+      <div class="sub">${Su(e.p)} trækker ét kort mere</div>` };
+    case 'give': return {
+      dur: 1600, html: `<div class="vis">${e.card ? cardHtml(e.card, 'big' + (e.bust ? ' dup' : '')) : '<span class="c big gv">➜<i>GIV</i></span>'}</div><div class="ttl" style="font-size:clamp(36px,12vw,64px)">Giv væk!</div>${e.t === undefined ? '' : who(e.p, e.t)}
+      <div class="sub">${e.none ? `${Su(e.p)} har ingen talkort` : e.bust ? `${P(e.t)} gik bust` : `${Su(e.p)} gav ${numOf(e.card)} væk`}</div>` };
   }
   return null;
 }
@@ -661,9 +686,12 @@ function cueText(e, v, after) {
   else if (e.type === 'sc') t = e.p === e.t ? `♥ ${Su(e.t)} fik en 2. chance` : `♥ ${Su(e.p)} gav ${P(e.t)} en 2. chance`;
   else if (e.type === 'seven') t = `⭐ SYV! ${Su(e.p)} fik 7 forskellige tal (+15)`;
   else if (e.type === 'win') t = `🏆 ${Su(e.p)} vinder med ${e.pts} point!`;
+  else if (e.type === 'pause') t = `Ⅱ Pause! ${Su(e.p)} springes over én gang`;
+  else if (e.type === 'extra') t = `＋ Ekstra træk! ${Su(e.p)} trækker ét kort mere`;
+  else if (e.type === 'give') t = e.none ? `➜ Giv væk uden talkort (${Su(e.p)})` : `➜ ${Su(e.p)} gav ${numOf(e.card)} til ${P(e.t)}${e.bust ? ' – bust' : ''}`;
   return un(t);
 }
-const CUE_KIND = { bust: 'bust', freeze: 'action', take3: 'action', sc: 'action', save: 'action', seven: 'seven', win: 'seven' };
+const CUE_KIND = { bust: 'bust', freeze: 'action', take3: 'action', sc: 'action', save: 'action', seven: 'seven', win: 'seven', pause: 'action', extra: 'action', give: 'action' };
 // Afspil hændelser: små effekter direkte på kort/rækker, store som overlay i kø
 function playEvents(fresh, v) {
   const meIdx = v.players.findIndex(p => p.id === myId);
@@ -710,7 +738,7 @@ function cardHtml(c, extra) {
   let cls = 'c', inner;
   if (c[0] === 'n') { cls += ' n' + c.slice(1); inner = c.slice(1); }
   else if (c[0] === 'm' || c === 'x2') { cls += ' mod'; inner = G.label(c); }
-  else { cls += ' ' + c; inner = { fr: '❄', f3: '3', sc: '♥' }[c] + '<i>' + CARD_NAME[c].toUpperCase() + '</i>'; }
+  else { cls += ' ' + c; inner = { fr: '❄', f3: '3', sc: '♥', et: '+', gv: '➜', pa: 'Ⅱ' }[c] + '<i>' + CARD_NAME[c].toUpperCase() + '</i>'; }
   return `<span class="${cls} ${extra || ''}" data-c="${c}">${inner}</span>`;
 }
 function handHtml(p, big) {
@@ -781,10 +809,17 @@ function renderLobby() {
   let qr = ''; try { const q = qrcode(0, 'M'); q.addData(link); q.make(); qr = q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); } catch (e) {}
   let h = '';
   if (errMsg) h += `<div class="err">${esc(errMsg)}</div>`;
-  h += `<div class="card" style="text-align:center"><div class="hint">${host ? 'Lad de andre scanne koden eller skrive spilkoden' : 'Du er med! Venter på at værten starter spillet…'}</div><div class="roomcode" id="roomcode">${esc(room)}</div><div class="qr">${qr}</div><div class="link">${esc(link)}</div>${host && navigator.share ? `<button class="ghost" style="margin-top:10px" onclick="navigator.share({title:'Én til?',text:'Spil Én til? med mig',url:'${esc(link)}'}).catch(()=>{})">Del link</button>` : ''}</div>`;
+  h += `<div class="card" style="text-align:center"><div class="hint">${host ? 'Lad de andre scanne koden eller skrive spilkoden' : 'Du er med! Venter på at værten starter spillet…'}</div><div class="roomcode" id="roomcode">${esc(room)}</div><div class="qr">${qr}</div><div class="link">${esc(link)}</div>${host && navigator.share ? `<button class="ghost" style="margin-top:10px" onclick="navigator.share({title:'FlipX',text:'Spil FlipX med mig',url:'${esc(link)}'}).catch(()=>{})">Del link</button>` : ''}</div>`;
   h += `<div class="card"><div class="lbl" style="margin-top:0">Spillere (${v.players.length}/8)</div><div class="plist">` + v.players.map((p, i) => `<div class="pl"><span class="dot ${p.online ? 'on' : 'off'}"></span><span class="grow">${esc(p.name)}${p.id === myId ? ' (dig)' : ''}${i === 0 ? ' 👑' : ''}</span>${host && i > 0 ? `<button class="x" onclick="hostKick('${esc(p.id)}')">✕</button>` : ''}</div>`).join('') + '</div>';
+  const sp = v.specials || { fr: true, f3: true, sc: true, et: false, gv: false, pa: false };
+  const max = v.deckMax || 12;
+  const onNames = SPEC_LIST.filter(([k]) => sp[k]).map(([, n]) => n).join(', ') || 'ingen';
+  h += `<div class="lbl">Talkort</div><div class="seg deck" id="deckSeg">${[8,12,16].map(n => `<button type="button" data-deck="${n}" class="${max === n ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostDeck(${n})">0–${n}</button>`).join('')}</div>`;
+  h += `<div class="lbl">Specialkort</div><div class="specs" id="specList">${SPEC_LIST.map(([k, n]) => `<button type="button" data-spec="${k}" class="${sp[k] ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostSpec('${k}')">${n}</button>`).join('')}</div>`;
+  h += `<div class="hint" id="rulesLine">Talkort 0–${max}. Med: ${esc(onNames)}.</div>`;
+  h += `<div class="hint">Ekstra træk: ét kort mere med det samme. Giv væk: giv et af dine tal til en anden (dublet = bust). Pause: springes over én gang, bliver i runden.</div>`;
   if (host) h += `<div class="lbl">Spil til (point)</div><input type="number" id="target" inputmode="numeric" value="${v.target}" onchange="hostTarget(this.value)"><button class="primary" id="btnStart" style="margin-top:14px;height:60px;font-size:20px" onclick="hostStart()" ${v.players.length < 2 ? 'disabled' : ''}>${v.players.length < 2 ? 'Venter på spillere…' : `Start spil (${v.players.length} spillere)`}</button>`;
-  else h += `<div class="hint">Der spilles til ${v.target} point.</div>`;
+  else h += `<div class="hint">Der spilles til ${v.target} point. Værten vælger bunke og specialkort.</div>`;
   h += `</div><button class="ghost" style="width:100%" onclick="leave()">${host ? 'Afslut spil' : 'Forlad spil'}</button>`;
   keepInput(() => { $('app').innerHTML = h; });
 }
@@ -794,6 +829,7 @@ function renderGame() {
   const myTurn = isMyTurn(v);
   if (lastSeq === null) lastSeq = v.seq;
   if (v.seq > lastSeq) { const fresh = v.log.filter(l => l.n > lastSeq); const imp = fresh.filter(l => l.kind === 'bust' || l.kind === 'seven' || l.kind === 'action').pop() || fresh[fresh.length - 1]; if (imp && !fxBig) toast(imp.txt, imp.kind); lastSeq = v.seq; }
+  if (!v.pending || v.pending.card !== 'gv') gvNum = null;
   if (myTurn && !wasMyTurn) { buzz([200, 100, 200]); beep(); keepAwake(); syncTurnVibe(); }
   if (!myTurn) stopTurnVibe();
   wasMyTurn = myTurn;
@@ -804,7 +840,7 @@ function renderGame() {
     const ap = actor >= 0 && v.players[actor];
     if (ap && !ap.online && ap.id !== myId) {
       h += `<div class="hostfix">⚠️ <b>${esc(ap.name)}</b> er offline. Vent på at telefonen kommer tilbage, eller spil for dem:`;
-      if (v.pending) h += `<button class="ghost" onclick="hostActFor('${esc(ap.id)}',{a:'choose',target:${v.pending.options[0]}})">Giv ${CARD_NAME[v.pending.card]} til ${esc(v.players[v.pending.options[0]].name)}</button>`;
+      if (v.pending) h += `<button class="ghost" onclick="hostActFor('${esc(ap.id)}',{a:'choose',target:${v.pending.options[0]}${v.pending.card === 'gv' ? ',num:' + (ap.nums[0] || 0) : ''}})">Giv ${CARD_NAME[v.pending.card]} til ${esc(v.players[v.pending.options[0]].name)}</button>`;
       else { if (G.canStop(ap)) h += `<button class="ghost" onclick="hostActFor('${esc(ap.id)}',{a:'stop'})">Stop for ${esc(ap.name)}</button>`; h += `<button class="ghost" onclick="hostActFor('${esc(ap.id)}',{a:'draw'})">Træk for ${esc(ap.name)}</button>`; }
       h += '</div>';
     }
@@ -816,7 +852,7 @@ function renderGame() {
   const mid = !dense && (v.players.length >= 5 || cardsMax >= 4);
   h += `<div class="grid${dense ? ' crowded' : mid ? ' mid' : ''}" id="grid">` + v.players.map((p, i) => {
     const st = p.seven ? 'seven' : p.status;
-    return `<div class="pr${i === actor ? ' turn' : ''}${st === 'bust' ? ' is-bust' : ''}" data-p="${i}"><span class="nm"><b>${esc(p.name)}</b>${p.id === myId ? '<span class="dig">Dig</span>' : ''}</span><span class="pts">${G.roundScore(p)}<small>${p.total} i alt</small></span><span class="meta">${statusChip(p)}${i === v.dealer ? '<span class="giver">giver</span>' : ''}${p.online ? '' : '<span class="offsmall">offline</span>'}</span><div class="sm">${handHtml(p, false)}</div></div>`;
+    return `<div class="pr${i === actor ? ' turn' : ''}${st === 'bust' ? ' is-bust' : ''}" data-p="${i}"><span class="nm"><b>${esc(p.name)}</b>${p.id === myId ? '<span class="dig">Dig</span>' : ''}</span><span class="pts">${G.roundScore(p)}<small>${p.total} i alt</small></span><span class="meta">${statusChip(p)}${p.skip ? '<span class="giver">over 1×</span>' : ''}${i === v.dealer ? '<span class="giver">giver</span>' : ''}${p.online ? '' : '<span class="offsmall">offline</span>'}</span><div class="sm">${handHtml(p, false)}</div></div>`;
   }).join('') + '</div>';
   $('app').innerHTML = h;
   // knapper
@@ -826,7 +862,15 @@ function renderGame() {
   b.innerHTML = `<button class="stop" id="btnStop" ${canAct && G.canStop(mp) ? '' : 'disabled'} onclick="hostAct({a:'stop'})">Stop</button><button class="draw" id="btnDraw" ${canAct ? '' : 'disabled'} onclick="hostAct({a:'draw'})">Træk kort</button>`;
   // modal: målvalg / rundeslut / spilslut
   const m = $('modal'), sh = $('sheet');
-  if (v.phase === 'play' && v.pending && v.pending.chooser === meIdx) {
+  if (v.phase === 'play' && v.pending && v.pending.card === 'gv' && v.pending.chooser === meIdx) {
+    const P = v.pending;
+    if (gvNum == null || P.numbers.indexOf(gvNum) < 0) {
+      sh.innerHTML = `<h2>Giv væk</h2><p class="hint">Vælg et af dine talkort. Har modtageren tallet i forvejen, går de bust.</p><div class="pick" id="pick">${P.numbers.map(n => `<button type="button" data-n="${n}" onclick="gvNum=${n};render()"><span>${n}</span></button>`).join('')}</div>`;
+    } else {
+      sh.innerHTML = `<h2>Giv ${gvNum} til…</h2><p class="hint"><button class="ghost" type="button" onclick="gvNum=null;render()">← Vælg et andet tal</button></p><div class="pick" id="pick">${P.options.map(i => `<button data-t="${i}" ${sending ? 'disabled' : ''} onclick="hostAct({a:'choose',target:${i},num:${gvNum}})"><span>${esc(v.players[i].name)}</span><b>${G.roundScore(v.players[i])} p</b></button>`).join('')}</div>`;
+    }
+    m.classList.add('show');
+  } else if (v.phase === 'play' && v.pending && v.pending.chooser === meIdx) {
     const P = v.pending;
     sh.innerHTML = `<h2>Du trak ${cardHtml(P.card).replace('class="c', 'class="c" style="width:34px;height:46px;font-size:18px;vertical-align:middle').replace(/<i>.*<\/i>/, '')} ${CARD_NAME[P.card]}</h2><p class="hint">${CARD_DESC[P.card]} Vælg en spiller:</p><div class="pick" id="pick">` +
       P.options.map(i => `<button data-t="${i}" ${sending ? 'disabled' : ''} onclick="hostAct({a:'choose',target:${i}})"><span>${esc(v.players[i].name)}${i === meIdx ? ' (dig selv)' : ''}</span><b>${G.roundScore(v.players[i])} p</b></button>`).join('') + '</div>';
