@@ -7,18 +7,27 @@
   function defaultSpecials() { return { fr: true, f3: true, sc: true, et: false, gv: false, pa: false }; }
   function normalizeRules(S) {
     if ([8, 12, 16].indexOf(S.deckMax) < 0) S.deckMax = 12;
+    if (S.chance !== 'low' && S.chance !== 'high') S.chance = 'std';
     if (!S.specials) S.specials = defaultSpecials();
     SPEC_KEYS.forEach(function (k) { if (typeof S.specials[k] !== 'boolean') S.specials[k] = !!defaultSpecials()[k]; });
   }
-  // max = højeste talkort (8, 12 eller 16). Antal af hvert tal = tallet, undtagen ét 0.
-  // specials: fr/f3/sc som standard til, et/gv/pa fra. Tre eksemplarer af hvert slået til.
-  function buildDeck(max, specials) {
+  // Standard: 1 af hver modifikator, 3 af hvert tændt specialkort.
+  // Lille ≈ halvdelen (mindst 1). Høj = dobbelt. Talkort er uændrede.
+  function chanceCopies(base, chance) {
+    if (chance === 'low') return Math.max(1, Math.round(base / 2));
+    if (chance === 'high') return base * 2;
+    return base;
+  }
+  function buildDeck(max, specials, chance) {
     max = max || 12;
-    var d = ['n0'], v, i, k;
+    if (chance !== 'low' && chance !== 'high') chance = 'std';
+    var d = ['n0'], v, i, k, n;
     for (v = 1; v <= max; v++) for (i = 0; i < v; i++) d.push('n' + v);
-    d.push('m2', 'm4', 'm6', 'm8', 'm10', 'x2');
+    n = chanceCopies(1, chance);
+    for (i = 0; i < n; i++) d.push('m2', 'm4', 'm6', 'm8', 'm10', 'x2');
     var sp = specials || defaultSpecials();
-    for (k = 0; k < SPEC_KEYS.length; k++) if (sp[SPEC_KEYS[k]]) for (i = 0; i < 3; i++) d.push(SPEC_KEYS[k]);
+    n = chanceCopies(3, chance);
+    for (k = 0; k < SPEC_KEYS.length; k++) if (sp[SPEC_KEYS[k]]) for (i = 0; i < n; i++) d.push(SPEC_KEYS[k]);
     return d;
   }
   function shuffle(a, rng) {
@@ -69,7 +78,7 @@
   function activeIdx(S) { var r = []; for (var i = 0; i < S.players.length; i++) if (isActive(S, i)) r.push(i); return r; }
 
   function createLobby(target) {
-    return { v: 1, phase: 'lobby', target: target || 200, deckMax: 12, specials: defaultSpecials(), players: [], log: [], seq: 0, events: [], evSeq: 0 };
+    return { v: 1, phase: 'lobby', target: target || 200, deckMax: 12, chance: 'std', specials: defaultSpecials(), players: [], log: [], seq: 0, events: [], evSeq: 0 };
   }
   function addPlayer(S, id, name) {
     var p = { id: id, name: name, online: true, total: 0 };
@@ -82,7 +91,7 @@
     if (S.players.length < 2) return { ok: false, err: 'Mindst 2 spillere' };
     S.phase = 'play'; S.round = 0; S.dealer = -1; S.history = []; S.winners = []; S.tie = false;
     normalizeRules(S);
-    S.deck = shuffle(buildDeck(S.deckMax, S.specials), rng); S.discard = [];
+    S.deck = shuffle(buildDeck(S.deckMax, S.specials, S.chance), rng); S.discard = [];
     S.players.forEach(function (p) { p.total = 0; resetPlayerRound(p); });
     log(S, 'Spillet starter! Mål: ' + S.target + ' point', 'info');
     startRound(S, rng);

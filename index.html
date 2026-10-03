@@ -523,6 +523,8 @@ function hostNewGame() { G.backToLobby(S); publish(); }
 function hostKick(pid) { const i = S.players.findIndex(p => p.id === pid); if (i <= 0 || S.phase !== 'lobby') return; const c = conns[pid]; if (c) { send(c, { t: 'reject', reason: 'Værten fjernede dig fra spillet.' }); delete conns[pid]; setTimeout(() => c.close(), 500); } S.players.splice(i, 1); publish(); }
 function hostTarget(v) { const t = parseInt(v, 10); if (t > 0 && S.phase === 'lobby') { S.target = t; publish(); } }
 function hostDeck(n) { n = +n; if (role !== 'host' || !S || S.phase !== 'lobby' || [8,12,16].indexOf(n) < 0) return; S.deckMax = n; publish(); }
+function hostChance(c) { if (role !== 'host' || !S || S.phase !== 'lobby' || ['low','std','high'].indexOf(c) < 0) return; S.chance = c; publish(); }
+const CHANCE_NAME = { low: 'Lille', std: 'Standard', high: 'Høj' };
 function hostSpec(k) { if (role !== 'host' || !S || S.phase !== 'lobby' || !S.specials || !(k in S.specials)) return; S.specials[k] = !S.specials[k]; publish(); }
 
 // ---------- KLIENT ----------
@@ -917,9 +919,11 @@ function renderLobby() {
   const sp = v.specials || { fr: true, f3: true, sc: true, et: false, gv: false, pa: false };
   const max = v.deckMax || 12;
   const onNames = SPEC_LIST.filter(([k]) => sp[k]).map(([, n]) => n).join(', ') || 'ingen';
+  const ch = v.chance === 'low' || v.chance === 'high' ? v.chance : 'std';
   h += `<div class="lbl">Talkort</div><div class="seg deck" id="deckSeg">${[8,12,16].map(n => `<button type="button" data-deck="${n}" class="${max === n ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostDeck(${n})">0–${n}</button>`).join('')}</div>`;
+  h += `<div class="lbl">Chance for specialkort</div><div class="seg deck" id="chanceSeg">${[['low','Lille'],['std','Standard'],['high','Høj']].map(([k, n]) => `<button type="button" data-chance="${k}" class="${ch === k ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostChance('${k}')">${n}</button>`).join('')}</div>`;
   h += `<div class="lbl">Specialkort</div><div class="specs" id="specList">${SPEC_LIST.map(([k, n]) => `<button type="button" data-spec="${k}" class="${sp[k] ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostSpec('${k}')">${n}</button>`).join('')}</div>`;
-  h += `<div class="hint" id="rulesLine">Talkort 0–${max}. Med: ${esc(onNames)}.</div>`;
+  h += `<div class="hint" id="rulesLine">Talkort 0–${max}. Chance: ${CHANCE_NAME[ch]}. Med: ${esc(onNames)}.</div>`;
   h += `<div class="hint">Ekstra træk: to kort mere med det samme. Bust på det første stopper det andet. Giv væk: giv et af dine tal til en anden (dublet = bust). Pause: springes over én gang, bliver i runden.</div>`;
   const aiN = v.players.filter(p => p.ai).length;
   const maxAi = Math.min(7, 8 - v.players.filter(p => !p.ai).length);
