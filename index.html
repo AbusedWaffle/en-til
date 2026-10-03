@@ -51,6 +51,9 @@ button:disabled{opacity:.35}
 .pr.turn{background:#1aaa46}
 .pr.is-bust{background:#5c1826}
 .pr.is-bust .sm{opacity:.6;filter:grayscale(.45)}
+.bustx{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;font-size:54px;font-weight:900;color:#ff2d4d;text-shadow:0 3px 0 #2a0610,0 0 14px #ff2d4daa;pointer-events:none;line-height:1}
+.bustpop{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#fff;background:#e0485fe6;border-radius:12px;animation:slam .4s both;pointer-events:none}
+.bustnote{position:absolute;left:6px;right:6px;bottom:6px;z-index:5;background:#e0485f;color:#fff;font-weight:800;font-size:12px;text-align:center;border-radius:8px;padding:3px 4px;pointer-events:none}
 .pr .nm{font-size:15px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.15;display:flex;align-items:center;gap:4px;min-width:0}
 .pr .nm b{overflow:hidden;text-overflow:ellipsis}
 .dig{flex:none;font-size:10px;font-weight:800;background:#10192ecc;color:#fff;border-radius:8px;padding:1px 5px;line-height:1.4}
@@ -732,7 +735,7 @@ const CUE_KIND = { bust: 'bust', freeze: 'action', take3: 'action', sc: 'action'
 function seesOverlay(e, meIdx) {
   if (e.type === 'freeze' || e.type === 'take3' || e.type === 'sc') return e.t === meIdx;
   if (e.type === 'give') return e.none ? e.p === meIdx : e.t === meIdx;
-  if (e.type === 'pause' || e.type === 'extra') return e.p === meIdx;
+  if (e.type === 'pause' || e.type === 'extra' || e.type === 'bust') return e.p === meIdx;
   return true;
 }
 function specLine(e, v) {
@@ -772,6 +775,14 @@ function flyCard(from, to, card, line) {
   }, 40);
   setTimeout(() => { if (fly.parentNode) fly.remove(); fxAddCls(b, 'fx-land'); }, 1250);
 }
+function tileBust(row, mode) {
+  if (!row) return;
+  const el = document.createElement('div');
+  el.className = mode === 'full' ? 'bustpop' : 'bustnote';
+  el.textContent = mode === 'full' ? 'BUST!' : 'Bust';
+  row.appendChild(el);
+  setTimeout(() => { if (el.parentNode) el.remove(); }, mode === 'full' ? 900 : 1500);
+}
 function spectate(e, v) {
   const line = specLine(e, v);
   const passed = (e.type === 'freeze' || e.type === 'take3' || e.type === 'give' || e.type === 'sc') && e.t !== undefined && e.p !== e.t && !e.none;
@@ -800,7 +811,8 @@ function playEvents(fresh, v) {
       fxCard(row, e.card, mod ? 'glow' : 'dealin', d);
       if (mod) { fxFloat(row, G.label(e.card)); fxAddCls(row, 'fx-gold'); }
     } else if (e.type === 'bust') {
-      fxCard(row, e.card, 'crack', 0, true); fxAddCls(row, 'fx-shake');
+      if (SET.anim === 'full') { fxCard(row, e.card, 'crack', 0, true); fxAddCls(row, 'fx-shake'); }
+      if (e.p !== meIdx) tileBust(row, SET.anim);
     } else if (e.type === 'stop') {
       fxAddCls(row, 'fx-stop'); fxFloat(row, 'Stopper · ' + e.pts + ' p', 'stop');
     } else if (e.type === 'freeze') {
@@ -818,7 +830,7 @@ function playEvents(fresh, v) {
         const o = { e, v };
         if (e.type === 'take3') o.cards = fresh.slice(k + 1).filter(x => x.f3 && x.p === e.t && (x.type === 'card' || x.type === 'bust' || x.type === 'save')).slice(0, 3);
         fxPush(o);
-      } else spectate(e, v);
+      } else if (e.type !== 'bust') spectate(e, v);
     }
   });
 }
@@ -946,7 +958,7 @@ function renderGame() {
   const mid = !dense && (v.players.length >= 5 || cardsMax >= 4);
   h += `<div class="grid${dense ? ' crowded' : mid ? ' mid' : ''}" id="grid">` + v.players.map((p, i) => {
     const st = p.seven ? 'seven' : p.status;
-    return `<div class="pr${i === actor ? ' turn' : ''}${st === 'bust' ? ' is-bust' : ''}" data-p="${i}"><span class="nm"><b>${esc(p.ai ? String(p.name).replace(/ \(AI\)$/, '') : p.name)}</b>${p.ai ? '<span class="ain"> (AI)</span>' : ''}${p.id === myId ? '<span class="dig">Dig</span>' : ''}</span><span class="pts">${G.roundScore(p)}<small>${p.total} i alt</small></span><span class="meta">${statusChip(p)}${p.skip ? '<span class="giver">over 1×</span>' : ''}${i === v.dealer ? '<span class="giver">giver</span>' : ''}${p.online ? '' : '<span class="offsmall">offline</span>'}</span><div class="sm">${handHtml(p, false)}</div></div>`;
+    return `<div class="pr${i === actor ? ' turn' : ''}${st === 'bust' ? ' is-bust' : ''}" data-p="${i}">${st === 'bust' ? '<span class="bustx">✕</span>' : ''}<span class="nm"><b>${esc(p.ai ? String(p.name).replace(/ \(AI\)$/, '') : p.name)}</b>${p.ai ? '<span class="ain"> (AI)</span>' : ''}${p.id === myId ? '<span class="dig">Dig</span>' : ''}</span><span class="pts">${G.roundScore(p)}<small>${p.total} i alt</small></span><span class="meta">${statusChip(p)}${p.skip ? '<span class="giver">over 1×</span>' : ''}${i === v.dealer ? '<span class="giver">giver</span>' : ''}${p.online ? '' : '<span class="offsmall">offline</span>'}</span><div class="sm">${handHtml(p, false)}</div></div>`;
   }).join('') + '</div>';
   $('app').innerHTML = h;
   // knapper
