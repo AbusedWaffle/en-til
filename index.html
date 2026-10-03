@@ -41,19 +41,44 @@ button:disabled{opacity:.35}
 .pl .grow{flex:1}
 .x{background:#10192e;color:#9fb0d0;padding:6px 11px;font-size:14px}
 /* spil */
-.banner{position:sticky;top:0;z-index:5;margin:0 -12px 12px;padding:14px 16px;text-align:center;font-size:20px;font-weight:800;background:#22345a;color:#cfd9ee;border-bottom:1px solid #10192e}
-.banner.me{background:#ffcf40;color:#10192e;font-size:30px;animation:pulse 1.2s infinite}
-.banner.bad{background:#5a2330;color:#ffd0d8}
-.banner small{display:block;font-size:13px;font-weight:600;opacity:.8;margin-top:2px}
-@keyframes pulse{0%{box-shadow:0 0 0 0 #ffcf40cc}70%{box-shadow:0 0 0 16px #ffcf4000}100%{box-shadow:0 0 0 0 #ffcf4000}}
-.sub{color:#9fb0d0;font-size:13px;text-align:center;margin:-4px 0 10px}
-.mine{position:relative}
-.mine.turn{outline:3px solid #ffcf40}
-.mhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-.mhead .pts{font-size:40px;font-weight:900;color:#ffcf40;line-height:1}
-.mhead .pts small{font-size:15px;color:#9fb0d0;font-weight:600}
-.hand{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;min-height:76px}
-.row2{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #ffcf40cc}70%{box-shadow:0 0 0 12px #ffcf4000}100%{box-shadow:0 0 0 0 #ffcf4000}}
+.subrow{display:flex;align-items:center;gap:8px;margin:0 2px 6px}
+.sub{color:#9fb0d0;font-size:12px;text-align:left;margin:0;flex:1;line-height:1.3}
+.leave{background:transparent;color:#9fb0d0;padding:4px 2px;font-size:12px;font-weight:700}
+/* spiller-gitter */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-content:start}
+.pr{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto auto;column-gap:4px;row-gap:1px;padding:7px 8px 8px;border-radius:12px;background:#1b2a4a;margin:0;border:0;min-width:0;align-content:start}
+.pr.turn{background:#1aaa46}
+.pr.is-bust{background:#5c1826}
+.pr.is-bust .sm{opacity:.6;filter:grayscale(.45)}
+.pr .nm{font-size:15px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.15;display:flex;align-items:center;gap:4px;min-width:0}
+.pr .nm b{overflow:hidden;text-overflow:ellipsis}
+.dig{flex:none;font-size:10px;font-weight:800;background:#10192ecc;color:#fff;border-radius:8px;padding:1px 5px;line-height:1.4}
+.pr.turn .dig{background:#0b3d1ccc}
+.meta{display:flex;gap:4px;align-items:center;min-width:0;overflow:hidden}
+.giver{font-size:10px;font-weight:800;color:#ffcf40;white-space:nowrap}
+.pr.turn .giver{color:#fff6c2}
+.offsmall{font-size:10px;font-weight:700;color:#ffb3c0}
+.pr .pts{grid-row:1 / span 2;grid-column:2;align-self:center;font-size:26px;font-weight:900;line-height:.9;text-align:right;color:#fff}
+.pr .pts small{display:block;font-size:10px;font-weight:700;color:#c5d2ea;margin-top:2px}
+.pr.turn .pts small{color:#e7ffe8}
+.pr .sm{grid-column:1 / -1;margin-top:4px}
+.grid .sm .c{width:42px;height:56px;font-size:24px;border-radius:7px}
+.grid .sm .c.mod{font-size:16px}
+.grid .sm .c.fr,.grid .sm .c.f3,.grid .sm .c.sc{font-size:18px}
+.grid.mid .sm .c{width:34px;height:46px;font-size:18px}
+.grid.mid .sm .c.mod{font-size:13px}
+.grid.mid .sm .c.fr,.grid.mid .sm .c.f3,.grid.mid .sm .c.sc{font-size:15px}
+.grid.crowded .sm .c{width:23px;height:31px;font-size:14px}
+.grid.crowded .sm .c.mod{font-size:11px}
+.grid.crowded .pr .pts{font-size:22px}
+.grid.crowded .pr{padding:5px 6px}
+body.ingame header{padding:6px 10px}
+body.ingame h1{font-size:18px}
+body.ingame main{padding:0 6px calc(76px + env(safe-area-inset-bottom))}
+body.ingame .bottom{padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+body.ingame .bottom button{height:56px;font-size:18px;border-radius:12px}
+body.ingame .disc{margin:6px 4px 0;padding-bottom:2px}
 .c{display:inline-flex;flex-direction:column;width:50px;height:72px;border-radius:9px;align-items:center;justify-content:center;font-weight:900;font-size:28px;background:#f6f1e3;color:#10192e;box-shadow:0 2px 0 #0006;line-height:1;text-align:center}
 .c i{font-style:normal;font-size:10px;font-weight:800;margin-top:3px;letter-spacing:.2px}
 .c.mod{background:#ff8a3d;color:#fff;font-size:22px}
@@ -68,15 +93,8 @@ button:disabled{opacity:.35}
 .sm .c i{display:none}
 .sm{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
 .n0{color:#555}.n1{color:#8a6d3b}.n2{color:#2e8b57}.n3{color:#c0392b}.n4{color:#2471a3}.n5{color:#16a085}.n6{color:#8e44ad}.n7{color:#d35400}.n8{color:#27ae60}.n9{color:#b7950b}.n10{color:#c2185b}.n11{color:#1a5276}.n12{color:#6c3483}
-.status{font-size:12px;font-weight:800;padding:4px 9px;border-radius:20px;background:#10192e;color:#9fb0d0;white-space:nowrap}
+.status{font-size:10px;font-weight:800;padding:1px 6px;border-radius:20px;background:#10192e;color:#9fb0d0;white-space:nowrap;line-height:1.5}
 .st-active{background:#1e4d3a;color:#8ff0c0}.st-stopped{background:#2b3d63;color:#cfe0ff}.st-bust{background:#e0485f;color:#fff}.st-frozen{background:#7fd8ff;color:#0b3550}.st-seven{background:#ffcf40;color:#10192e}
-.pr{padding:10px 12px;border-radius:14px;background:#22345a;margin-bottom:8px;border:2px solid transparent}
-.pr.cur{border-color:#ffcf40;background:#3a3212}
-.pr .top{display:flex;align-items:center;gap:8px}
-.pr .nm{flex:1;font-size:17px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pr .nm small{font-weight:500;color:#9fb0d0;font-size:12px;margin-left:4px}
-.pr .rp{font-size:13px;color:#9fb0d0;min-width:42px;text-align:right}
-.pr .tot{font-size:22px;font-weight:900;min-width:44px;text-align:right}
 .rank{width:24px;height:24px;border-radius:50%;background:#10192e;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex:none}
 .rank.lead{background:#ffcf40;color:#10192e}
 .log div{padding:5px 0;border-bottom:1px solid #22345a;font-size:14px;color:#cfd9ee}
@@ -119,12 +137,7 @@ td.n{text-align:right;font-weight:800}
 @keyframes cshake{0%,100%{transform:none}20%{transform:translateX(-5px) rotate(-6deg)}40%{transform:translateX(5px) rotate(5deg)}60%{transform:translateX(-4px) rotate(-3deg)}80%{transform:translateX(3px)}}
 #app.shake{animation:shake .5s}
 @keyframes shake{0%,100%{transform:none}15%{transform:translate(-9px,3px)}30%{transform:translate(8px,-4px)}45%{transform:translate(-7px,2px)}60%{transform:translate(6px,-2px)}75%{transform:translate(-3px,1px)}}
-.pr,.mine{position:relative}
-.pr.is-bust{background:linear-gradient(135deg,#4a1a28,#2a1d33);border-color:#e0485f55}
-.pr.is-bust .sm{opacity:.55;filter:grayscale(.5)}
-.pr.is-frozen,.mine.is-frozen{background:linear-gradient(135deg,#1d5878,#22345a 70%);border-color:#7fd8ff88;overflow:hidden}
-.pr.is-frozen::after,.mine.is-frozen::after{content:'❄';position:absolute;right:-6px;bottom:-22px;font-size:74px;color:#dff6ff;opacity:.13;pointer-events:none}
-.mine.is-bust{background:linear-gradient(135deg,#4a1a28,#1b2a4a 70%)}
+.pr{position:relative}
 .fx-shake{animation:shake .5s,flashr 1s}
 @keyframes flashr{0%{box-shadow:inset 0 0 0 60px #e0485fdd,0 0 0 0 #e0485f}100%{box-shadow:inset 0 0 0 0 #e0485f00,0 0 0 14px #e0485f00}}
 .fx-ice{animation:ice 1.2s}
@@ -218,7 +231,7 @@ td.n{text-align:right;font-weight:800}
 .conf{position:absolute;top:42%;left:50%;width:9px;height:15px;background:var(--c);border-radius:2px;z-index:1;animation:conf var(--d) var(--dl) both;pointer-events:none}
 @keyframes conf{0%{transform:translate(0,0) rotate(0) scale(.4);animation-timing-function:cubic-bezier(.1,.8,.3,1)}28%{transform:translate(var(--bx),var(--by)) rotate(calc(var(--r)/3)) scale(1);animation-timing-function:cubic-bezier(.45,0,.8,.7)}100%{transform:translate(var(--sx),70vh) rotate(var(--r))}}
 /* Dæmpede animationer (standard ved prefers-reduced-motion) */
-body.anim-reduced .c.dealin,body.anim-reduced .c.glow,body.anim-reduced .c.crack,body.anim-reduced #app.shake,body.anim-reduced .fx-shake,body.anim-reduced .fx-ice,body.anim-reduced .fx-glow,body.anim-reduced .fx-stop,body.anim-reduced .fx-gold,body.anim-reduced .fxrows tr,body.anim-reduced .banner.me,body.anim-reduced .bottom.go .draw{animation:none!important}
+body.anim-reduced .c.dealin,body.anim-reduced .c.glow,body.anim-reduced .c.crack,body.anim-reduced #app.shake,body.anim-reduced .fx-shake,body.anim-reduced .fx-ice,body.anim-reduced .fx-glow,body.anim-reduced .fx-stop,body.anim-reduced .fx-gold,body.anim-reduced .fxrows tr,body.anim-reduced .bottom.go .draw{animation:none!important}
 body.anim-reduced #fx *,body.anim-reduced #fx::before{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important}
 body.anim-reduced #fx .bar{animation:bar var(--dur) linear both!important}
 body.anim-reduced #fx .flake,body.anim-reduced #fx .conf{display:none}
@@ -638,22 +651,22 @@ function playEvents(fresh, v) {
   }
   let stagger = 0;
   fresh.forEach((e, k) => {
-    const row = fxRow(e.p), mineEl = e.p === meIdx ? $('mine') : null;
+    const row = fxRow(e.p);
     const d = e.deal ? stagger++ * 140 : 0;
     if (e.type === 'card') {
       const mod = e.card[0] === 'm' || e.card === 'x2';
-      [row, mineEl].forEach(sc => fxCard(sc, e.card, mod ? 'glow' : 'dealin', d));
-      if (mod) { fxFloat(row, G.label(e.card)); fxFloat(mineEl, G.label(e.card)); fxAddCls(row, 'fx-gold'); }
+      fxCard(row, e.card, mod ? 'glow' : 'dealin', d);
+      if (mod) { fxFloat(row, G.label(e.card)); fxAddCls(row, 'fx-gold'); }
     } else if (e.type === 'bust') {
-      [row, mineEl].forEach(sc => fxCard(sc, e.card, 'crack', 0, true)); fxAddCls(row, 'fx-shake'); fxAddCls(mineEl, 'fx-shake');
+      fxCard(row, e.card, 'crack', 0, true); fxAddCls(row, 'fx-shake');
     } else if (e.type === 'stop') {
-      fxAddCls(row, 'fx-stop'); fxFloat(row, 'Stopper · ' + e.pts + ' p', 'stop'); fxFloat(mineEl, 'Stopper · ' + e.pts + ' p', 'stop');
+      fxAddCls(row, 'fx-stop'); fxFloat(row, 'Stopper · ' + e.pts + ' p', 'stop');
     } else if (e.type === 'freeze') {
-      fxAddCls(fxRow(e.t), 'fx-ice'); if (e.t === meIdx) fxAddCls($('mine'), 'fx-ice');
+      fxAddCls(fxRow(e.t), 'fx-ice');
     } else if (e.type === 'sc' || e.type === 'save') {
-      const t = e.type === 'sc' ? e.t : e.p; fxAddCls(fxRow(t), 'fx-glow'); if (t === meIdx) fxAddCls($('mine'), 'fx-glow');
+      const t = e.type === 'sc' ? e.t : e.p; fxAddCls(fxRow(t), 'fx-glow');
     } else if (e.type === 'seven') {
-      fxAddCls(row, 'fx-gold'); fxAddCls(mineEl, 'fx-gold');
+      fxAddCls(row, 'fx-gold');
     } else if (e.type === 'roundEnd') {
       const t = $('summary'); if (t) t.classList.add('fxrows');
     }
@@ -700,6 +713,7 @@ function keepInput(fn) {
 }
 function render() {
   setPill();
+  document.body.classList.toggle('ingame', !!(view && view.phase && view.phase !== 'lobby' && role && !rejected));
   const ov = $('ov');
   if (role === 'client' && !rejected && view && connState !== 'online') {
     ov.innerHTML = `<div class="overlay"><div class="box"><div class="spin"></div><h2>Forbindelsen til værten er tabt</h2><p class="hint">${esc(errMsg || 'Prøver at genoprette forbindelsen…')}</p><p class="hint">Du kommer automatisk tilbage i spillet med dine kort, når forbindelsen er genoprettet.</p><button class="ghost" onclick="leave()">Forlad spillet</button></div></div>`;
@@ -751,25 +765,11 @@ function renderLobby() {
 function renderGame() {
   const v = view, meIdx = v.players.findIndex(p => p.id === myId), mp = v.players[meIdx];
   const myTurn = isMyTurn(v);
-  // nye hændelser -> toast
   if (lastSeq === null) lastSeq = v.seq;
   if (v.seq > lastSeq) { const fresh = v.log.filter(l => l.n > lastSeq); const imp = fresh.filter(l => l.kind === 'bust' || l.kind === 'seven' || l.kind === 'action').pop() || fresh[fresh.length - 1]; if (imp && !fxBig) toast(imp.txt, imp.kind); lastSeq = v.seq; }
   if (myTurn && !wasMyTurn) { buzz([200, 100, 200]); beep(); keepAwake(); }
   wasMyTurn = myTurn;
-  // banner
-  let bannerCls = '', bannerTxt = '', sub = '';
-  if (v.phase === 'play') {
-    if (v.pending) {
-      const ch = v.players[v.pending.chooser];
-      if (v.pending.chooser === meIdx) { bannerCls = 'me'; bannerTxt = 'Din tur!'; sub = 'Vælg hvem der får ' + CARD_NAME[v.pending.card]; }
-      else { bannerTxt = `${esc(ch.name)} vælger…`; sub = 'hvem der får ' + CARD_NAME[v.pending.card]; }
-    } else if (v.stage === 'deal') bannerTxt = 'Kortene gives…';
-    else if (v.turn === meIdx) { bannerCls = 'me'; bannerTxt = 'Din tur!'; sub = 'Træk et kort eller stop'; }
-    else if (v.turn >= 0) { bannerTxt = `Venter på ${esc(v.players[v.turn].name)}…`; sub = mp && mp.status !== 'active' ? 'Du er ude af runden' : ''; }
-  } else if (v.phase === 'roundEnd') bannerTxt = `Runde ${v.round} er slut`;
-  else if (v.phase === 'over') bannerTxt = 'Spillet er slut';
-  let h = `<div class="banner ${bannerCls}" id="banner">${bannerTxt}${sub ? `<small>${esc(sub)}</small>` : ''}</div>`;
-  h += `<div class="sub">Runde ${v.round} · Spil til ${v.target} · Bunke: ${v.deckCount} kort</div>`;
+  let h = `<div class="subrow"><div class="sub" id="roundline">Runde ${v.round} · Spil til ${v.target} · Bunke: ${v.deckCount} kort</div><button class="leave" onclick="leave()">${role === 'host' ? 'Afslut' : 'Forlad'}</button></div>`;
   // værts-hjælp for offline spillere
   if (role === 'host' && v.phase === 'play') {
     const actor = v.pending ? v.pending.chooser : (v.stage === 'turns' ? v.turn : -1);
@@ -782,24 +782,14 @@ function renderGame() {
     }
   }
   if (errMsg && role === 'host') h += `<div class="err">${esc(errMsg)}</div>`;
-  // mine kort
-  if (mp) {
-    const hd = handHtml(mp, true);
-    const pts = G.roundScore(mp);
-    h += `<div class="card mine ${myTurn ? 'turn' : ''} ${v.phase === 'play' ? 'is-' + mp.status : ''}" id="mine"><div class="mhead"><div><div class="lbl" style="margin:0 0 4px">Dine kort · ${esc(mp.name)}</div>${statusChip(mp)}${mp.sc ? ' <span class="status st-stopped">♥ 2. chance</span>' : ''}</div><div class="pts" id="mypts">${pts}<small> point</small></div></div>`;
-    h += `<div class="hand">${hd.nums.join('') || '<span class="hint">Ingen talkort endnu</span>'}</div>${hd.other.length ? `<div class="row2">${hd.other.join('')}</div>` : ''}`;
-    h += `<div class="hint" style="margin-top:8px">${new Set(mp.nums).size}/7 forskellige tal · Total: <b>${mp.total}</b></div></div>`;
-  }
-  // spillerliste
-  const ranks = v.players.map(p => p.total).slice().sort((a, b) => b - a);
-  const maxT = ranks[0];
   const actor = v.phase === 'play' ? (v.pending ? v.pending.chooser : v.turn) : -1;
-  h += '<div class="card"><div class="lbl" style="margin-top:0">Stilling (i turrækkefølge)</div>' + v.players.map((p, i) => {
-    const rk = ranks.indexOf(p.total) + 1;
-    return `<div class="pr ${i === actor ? 'cur' : ''} is-${p.status}" data-p="${i}"><div class="top"><span class="rank ${p.total === maxT && maxT > 0 ? 'lead' : ''}">${rk}</span><span class="nm">${i === actor ? '▶ ' : ''}${esc(p.name)}${p.id === myId ? '<small>(dig)</small>' : ''}${i === v.dealer ? '<small>giver</small>' : ''}${p.online ? '' : '<small style="color:#ff9aab">offline</small>'}</span>${statusChip(p)}<span class="rp">+${G.roundScore(p)}</span><span class="tot">${p.total}</span></div><div class="sm">${handHtml(p, false)}</div></div>`;
+  const cardsMax = Math.max.apply(null, v.players.map(p => (p.nums||[]).length + (p.mods||[]).length + (p.acts||[]).length + (p.bustCard != null ? 1 : 0)));
+  const dense = v.players.length >= 7 || cardsMax >= 7;
+  const mid = !dense && (v.players.length >= 5 || cardsMax >= 4);
+  h += `<div class="grid${dense ? ' crowded' : mid ? ' mid' : ''}" id="grid">` + v.players.map((p, i) => {
+    const st = p.seven ? 'seven' : p.status;
+    return `<div class="pr${i === actor ? ' turn' : ''}${st === 'bust' ? ' is-bust' : ''}" data-p="${i}"><span class="nm"><b>${esc(p.name)}</b>${p.id === myId ? '<span class="dig">Dig</span>' : ''}</span><span class="pts">${G.roundScore(p)}<small>${p.total} i alt</small></span><span class="meta">${statusChip(p)}${i === v.dealer ? '<span class="giver">giver</span>' : ''}${p.online ? '' : '<span class="offsmall">offline</span>'}</span><div class="sm">${handHtml(p, false)}</div></div>`;
   }).join('') + '</div>';
-  h += '<div class="card log"><div class="lbl" style="margin-top:0">Seneste</div>' + v.log.slice(-8).reverse().map(l => `<div class="${l.kind}">${esc(l.txt)}</div>`).join('') + '</div>';
-  h += `<button class="ghost" style="width:100%;margin-bottom:10px" onclick="leave()">${role === 'host' ? 'Afslut spil' : 'Forlad spil'}</button>`;
   $('app').innerHTML = h;
   // knapper
   const canAct = v.phase === 'play' && !v.pending && v.stage === 'turns' && v.turn === meIdx && !sending;

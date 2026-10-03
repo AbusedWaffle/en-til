@@ -15,12 +15,12 @@ Tip: Tryk på del-knappen i browseren og vælg **Føj til hjemmeskærm**, så li
 - **Værtens telefon holder spillet i gang.** Værten skal have spillet åbent og skærmen tændt. Hvis værtens telefon låser eller lukker spillet, går spillet i stå for alle, indtil værten åbner det igen. Så fortsætter det, hvor I slap.
 - **Alle skal have internet.** Det er sikrest, at alle er på samme wifi.
 - **Mister du forbindelsen eller genindlæser siden,** kommer du automatisk tilbage med dine kort. Er du væk, mens det er din tur, kan værten trække eller stoppe for dig.
-- **På iPhone** vibrerer telefonen ikke, når det er din tur, men du får et bip og et stort gult banner.
+- **På iPhone** vibrerer telefonen ikke, når det er din tur, men du får et bip, og din brik bliver grøn.
 
 ## Sådan fungerer spillet
 Målet er at være den første, der når 200 point. Hver runde handler om at trække kort uden at få det samme tal to gange.
 
-- **Din tur:** Når det er din tur, står der **Din tur!** øverst. Så trykker du enten **Træk kort** for at få et kort mere eller **Stop** for at gemme dine point for runden. Når det er en andens tur, står der, hvem I venter på.
+- **Din tur:** Den, der har turen, har en **grøn brik**. Så trykker du enten **Træk kort** for at få et kort mere eller **Stop** for at gemme dine point for runden. Alle spillere står i et gitter med deres kort og point.
 - **Bust:** Trækker du et tal, du allerede har, går du bust og får 0 point i runden.
 - **7 forskellige (SYV!):** Får du 7 forskellige tal, slutter runden med det samme for alle, og du får 15 bonuspoint.
 - **Point:** Du får summen af dine talkort. Et **×2**-kort fordobler talkortene, og **plus-kort** (+2 til +10) lægges til bagefter.
@@ -32,7 +32,7 @@ Målet er at være den første, der når 200 point. Hver runde handler om at tr�
 - **Rundens slutning:** Alle ser, hvor mange point de fik, og værten trykker **Næste runde**.
 - **Vinder:** Når nogen har nået målet, spilles runden færdig, og den med flest point vinder. Er der uafgjort i toppen, spilles én runde mere.
 
-Skærmen viser hele tiden dine kort, dine point i runden, alles kort og stillingen.
+Skærmen viser alle spillere på én gang: navn, kort, status og point. Din egen brik er mærket **Dig**.
 
 ## Animationer
 Alle telefoner viser med det samme, hvad der sker, og hvem det sker for: **BUST!** med rystelse og et knækket kort, **Frosset!** med sne og is, **Træk 3!** hvor de tre kort vendes ét ad gangen, **2. chance** og **Reddet!**, når den redder dig, konfetti ved **SYV!** (7 forskellige tal, +15) og når nogen vinder. Når nogen giver et kort til en anden, står der, hvem der gav det til hvem. Tryk på skærmen for at lukke en animation med det samme.
