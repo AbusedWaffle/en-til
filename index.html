@@ -144,6 +144,7 @@ td.n{text-align:right;font-weight:800}
 .fx-shake{animation:shake .5s,flashr 1s}
 @keyframes flashr{0%{box-shadow:inset 0 0 0 60px #e0485fdd,0 0 0 0 #e0485f}100%{box-shadow:inset 0 0 0 0 #e0485f00,0 0 0 14px #e0485f00}}
 .fx-ice{animation:ice 1.2s}
+.fx-land{animation:goldr .8s}
 @keyframes ice{0%{box-shadow:inset 0 0 0 40px #e6f7ffcc}100%{box-shadow:inset 0 0 0 0 #e6f7ff00}}
 .fx-glow{animation:glowr 1.2s}
 @keyframes glowr{0%{box-shadow:0 0 0 0 #ff6b86}40%{box-shadow:0 0 16px 4px #ff6b86}100%{box-shadow:0 0 0 0 #ff6b8600}}
@@ -248,7 +249,9 @@ body.anim-reduced #fx .flake,body.anim-reduced #fx .conf{display:none}
 body.anim-reduced .floaty{animation:fadeq 1.2s both!important}
 /* Ingen animationer: kun statisk tekst */
 body.anim-none *:not(.spin),body.anim-none *::before,body.anim-none *::after{animation:none!important;transition:none!important}
-body.anim-none #fx,body.anim-none .floaty{display:none!important}
+body.anim-none #fx,body.anim-none .floaty,body.anim-none .flyer{display:none!important}
+.flyer{position:fixed;z-index:45;left:0;top:0;pointer-events:none;transition:transform 1s cubic-bezier(.2,.75,.2,1);filter:drop-shadow(0 12px 14px #000a);will-change:transform}
+.flyer .c{width:68px;height:90px;font-size:30px}
 #toast.cue{white-space:pre-line;line-height:1.35;border:2px solid #fff6}
 /* indstillinger */
 .gear{background:#1b2a4a;color:#cfd9ee;width:40px;height:40px;padding:0;border-radius:50%;font-size:21px;line-height:40px;flex:none}
@@ -692,6 +695,57 @@ function cueText(e, v, after) {
   return un(t);
 }
 const CUE_KIND = { bust: 'bust', freeze: 'action', take3: 'action', sc: 'action', save: 'action', seven: 'seven', win: 'seven', pause: 'action', extra: 'action', give: 'action' };
+// Fuldskærm kun for den, kortet rammer. Alle andre ser brikken (og et flyvende kort, hvis det gives videre).
+function seesOverlay(e, meIdx) {
+  if (e.type === 'freeze' || e.type === 'take3' || e.type === 'sc') return e.t === meIdx;
+  if (e.type === 'give') return e.none ? e.p === meIdx : e.t === meIdx;
+  if (e.type === 'pause' || e.type === 'extra') return e.p === meIdx;
+  return true;
+}
+function specLine(e, v) {
+  const nm = i => ((v.players[i] || {}).name) || '?';
+  if (e.type === 'freeze') return e.p === e.t ? nm(e.p) + ' bruger Frys på sig selv' : nm(e.p) + ' sender Frys til ' + nm(e.t);
+  if (e.type === 'take3') return e.p === e.t ? nm(e.p) + ' tager selv Træk 3' : nm(e.p) + ' sender Træk 3 til ' + nm(e.t);
+  if (e.type === 'give') return e.none ? nm(e.p) + ' trak Giv væk' : nm(e.p) + ' sender ' + numOf(e.card) + ' til ' + nm(e.t);
+  if (e.type === 'sc') return e.p === e.t ? nm(e.t) + ' fik en 2. chance' : nm(e.p) + ' sender 2. chance til ' + nm(e.t);
+  if (e.type === 'pause') return nm(e.p) + ' springes over én gang';
+  if (e.type === 'extra') return nm(e.p) + ' får et ekstra træk';
+  return '';
+}
+function fxGhost(row, card) {
+  if (!row || row.querySelector('.c[data-c="' + card + '"]')) return;
+  const sm = row.querySelector('.sm'); if (!sm) return;
+  sm.insertAdjacentHTML('beforeend', cardHtml(card, 'dealin ghost'));
+  const el = sm.lastElementChild;
+  setTimeout(() => { if (el && el.parentNode) el.remove(); }, 900);
+}
+function flyCard(from, to, card, line) {
+  const a = fxRow(from), b = fxRow(to);
+  if (SET.anim !== 'full' || !a || !b || from === to) { if (line) toast(line, 'action', 2000); return; }
+  const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+  const fly = document.createElement('div');
+  fly.className = 'flyer';
+  fly.innerHTML = cardHtml(card);
+  const x = ra.left + ra.width / 2, y = ra.top + ra.height / 2;
+  const dx = (rb.left + rb.width / 2) - x, dy = (rb.top + rb.height / 2) - y;
+  fly.style.transition = 'none';
+  fly.style.transform = 'translate(' + x + 'px,' + y + 'px) translate(-50%,-50%) rotate(-10deg)';
+  document.body.appendChild(fly);
+  void fly.offsetWidth;
+  if (line) toast(line, 'action', 2200);
+  setTimeout(() => {
+    fly.style.transition = 'transform 1.15s linear';
+    fly.style.transform = 'translate(' + x + 'px,' + y + 'px) translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(.72) rotate(8deg)';
+  }, 40);
+  setTimeout(() => { if (fly.parentNode) fly.remove(); fxAddCls(b, 'fx-land'); }, 1250);
+}
+function spectate(e, v) {
+  const line = specLine(e, v);
+  const passed = (e.type === 'freeze' || e.type === 'take3' || e.type === 'give' || e.type === 'sc') && e.t !== undefined && e.p !== e.t && !e.none;
+  if (SET.anim !== 'full' || !passed) { if (line && SET.anim === 'reduced') toast(line, 'action', 2000); return; }
+  const card = e.type === 'freeze' ? 'fr' : e.type === 'take3' ? 'f3' : e.type === 'sc' ? 'sc' : (e.card || 'gv');
+  flyCard(e.p, e.t, card, line);
+}
 // Afspil hændelser: små effekter direkte på kort/rækker, store som overlay i kø
 function playEvents(fresh, v) {
   const meIdx = v.players.findIndex(p => p.id === myId);
@@ -725,10 +779,13 @@ function playEvents(fresh, v) {
     } else if (e.type === 'roundEnd') {
       const t = $('summary'); if (t) t.classList.add('fxrows');
     }
+    if (e.type === 'card' && SET.anim === 'full' && 'fr f3 sc et gv pa'.split(' ').indexOf(e.card) >= 0) fxGhost(row, e.card);
     if (FX_BIG[e.type]) {
-      const o = { e, v };
-      if (e.type === 'take3') o.cards = fresh.slice(k + 1).filter(x => x.f3 && x.p === e.t && (x.type === 'card' || x.type === 'bust' || x.type === 'save')).slice(0, 3);
-      fxPush(o);
+      if (seesOverlay(e, meIdx)) {
+        const o = { e, v };
+        if (e.type === 'take3') o.cards = fresh.slice(k + 1).filter(x => x.f3 && x.p === e.t && (x.type === 'card' || x.type === 'bust' || x.type === 'save')).slice(0, 3);
+        fxPush(o);
+      } else spectate(e, v);
     }
   });
 }
