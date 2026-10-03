@@ -1,6 +1,6 @@
 // Offentlige Firebase-nøgler til FlipX. De må ligge i browseren. Ingen service account.
 export const firebaseConfig = {
-  apiKey: "AIzaSyA64X0pjCwzO7AGGILjH9S7TODAJSx5M4",
+  apiKey: "AIzaSyA64X0pjCwzO7AGGILjJH9S7TODAJSx5M4",
   authDomain: "flipx-ed26b.firebaseapp.com",
   projectId: "flipx-ed26b",
   storageBucket: "flipx-ed26b.firebasestorage.app",
