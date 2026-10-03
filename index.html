@@ -254,6 +254,12 @@ body.anim-none #fx,body.anim-none .floaty{display:none!important}
 .sw::after{content:'';position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:50%;background:#fff;transition:left .15s}
 .sw.on{background:#3ddc84}.sw.on::after{left:28px}
 .sw:disabled{opacity:.35}
+#vibKeepBox{margin:0 0 4px;padding:0 0 4px 12px;border-left:3px solid #2b3d63}
+#vibKeepBox.is-off{opacity:.4}
+#vibKeepBox .trow{border-top:0;padding-top:4px}
+.seg.every{margin-top:2px}
+.seg.every button{padding:10px 0;font-size:15px}
+#everyHint{margin:6px 0 0}
 @keyframes fadeq{0%,100%{opacity:0}20%,80%{opacity:1}}
 </style></head><body>
 <header><h1>ÉN <span>TIL?</span></h1><div class="pill" id="pill"><span class="dot"></span>Offline</div><button class="gear" id="gear" aria-label="Indstillinger" onclick="openSettings()">⚙</button></header>
@@ -308,7 +314,9 @@ const CAN_VIB = typeof navigator.vibrate === 'function';
 const ANIM_MODES = ['full', 'reduced', 'none'];
 function loadSettings() {
   const s = LS.get('settings', {}) || {};
-  return { anim: ANIM_MODES.includes(s.anim) ? s.anim : (RM.matches ? 'reduced' : 'full'), sound: s.sound !== false, vib: s.vib !== false };
+  const steps = [2, 3, 5, 10, 15];
+  return { anim: ANIM_MODES.includes(s.anim) ? s.anim : (RM.matches ? 'reduced' : 'full'), sound: s.sound !== false, vib: s.vib !== false,
+    vibKeep: s.vibKeep === true, vibEvery: steps.indexOf(+s.vibEvery) >= 0 ? +s.vibEvery : 5 };
 }
 let SET = loadSettings();
 function applySettings() {
@@ -320,6 +328,7 @@ function setSetting(k, v) {
   if (k === 'anim' && v === 'none' && typeof fxQ !== 'undefined') { fxQ = []; if (fxCur) fxNext(); }
   if (k === 'sound' && v) beep(true);
   if (k === 'vib' && v) buzz(40, true);
+  if (k === 'vib' || k === 'vibKeep' || k === 'vibEvery') syncTurnVibe();
   renderSettings();
 }
 const reducedFx = () => SET.anim === 'reduced';
@@ -330,6 +339,11 @@ function renderSettings() {
     <div class="lbl">Animationer</div><div class="seg" id="segAnim">${seg}</div><div class="hint" style="margin:6px 0 10px">${desc}</div>
     <div class="trow"><span>Lyd<small>Bip når det er din tur, og lydeffekter</small></span><button class="sw ${SET.sound ? 'on' : ''}" id="swSound" role="switch" aria-checked="${SET.sound}" aria-label="Lyd" onclick="setSetting('sound',${!SET.sound})"></button></div>
     <div class="trow"><span>Vibration<small>${CAN_VIB ? 'Vibrerer når det er din tur og ved hændelser' : 'Din telefon understøtter ikke vibration i browseren (fx iPhone)'}</small></span><button class="sw ${SET.vib && CAN_VIB ? 'on' : ''}" id="swVib" role="switch" aria-checked="${SET.vib && CAN_VIB}" aria-label="Vibration" ${CAN_VIB ? '' : 'disabled'} onclick="setSetting('vib',${!SET.vib})"></button></div>
+    <div id="vibKeepBox" class="${SET.vib && CAN_VIB ? '' : 'is-off'}">
+      <div class="trow"><span>Bliv ved<small>Gentag vibrationen, mens det stadig er din tur</small></span><button class="sw ${SET.vibKeep && SET.vib && CAN_VIB ? 'on' : ''}" id="swKeep" role="switch" aria-checked="${!!(SET.vibKeep && SET.vib && CAN_VIB)}" aria-label="Bliv ved" ${SET.vib && CAN_VIB ? '' : 'disabled'} onclick="setSetting('vibKeep',${!SET.vibKeep})"></button></div>
+      <div class="seg every" id="segEvery">${[2,3,5,10,15].map(n => `<button data-every="${n}" class="${SET.vibEvery === n ? 'on' : ''}" ${SET.vib && CAN_VIB ? '' : 'disabled'} onclick="setSetting('vibEvery',${n})">${n}</button>`).join('')}</div>
+      <div class="hint" id="everyHint">hvert ${SET.vibEvery}. sekund</div>
+    </div>
     <div class="hint" style="margin-top:4px">Gælder kun denne telefon.</div>
     <button class="primary" style="margin-top:12px" onclick="closeSettings()">Luk</button>`;
 }
@@ -342,6 +356,18 @@ let actx = null;
 document.addEventListener('pointerdown', () => { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {} }, { passive: true });
 function beep(force) { try { if (!actx || !SET.sound) return; const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(0.15, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.25); o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + 0.25); } catch (e) {} }
 function buzz(p) { try { if (SET.vib && CAN_VIB) navigator.vibrate(p); } catch (e) {} }
+let turnVibeT = null;
+function stopTurnVibe() { if (turnVibeT) { clearInterval(turnVibeT); turnVibeT = null; } }
+// Gentag kun en kort vibration, mens det ER din tur. Ingen stak, og intet mens fanen er skjult.
+function syncTurnVibe() {
+  stopTurnVibe();
+  if (!SET.vibKeep || !SET.vib || !CAN_VIB || !view || !isMyTurn(view)) return;
+  turnVibeT = setInterval(() => {
+    if (document.hidden) return;
+    if (!isMyTurn(view)) return stopTurnVibe();
+    buzz(160);
+  }, SET.vibEvery * 1000);
+}
 let wakeLock = null;
 async function keepAwake() { try { if ('wakeLock' in navigator && !wakeLock && document.visibilityState === 'visible') { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } } catch (e) {} }
 
@@ -509,6 +535,7 @@ document.addEventListener('visibilitychange', () => {
 function leave() {
   const msg = role === 'host' ? 'Afslut spillet? Du er vært, så spillet stopper for alle.' : 'Forlad spillet?';
   if (!confirm(msg)) return;
+  stopTurnVibe();
   if (role === 'host') { Object.values(conns).forEach(c => send(c, { t: 'reject', reason: 'Værten har afsluttet spillet.' })); LS.del('host-' + room); }
   LS.del('session');
   setTimeout(() => { try { peer && peer.destroy(); } catch (e) {} location.href = location.pathname + '?' + new URLSearchParams([...qs].filter(([k]) => PEER_KEYS.includes(k))).toString(); }, 300);
@@ -767,7 +794,8 @@ function renderGame() {
   const myTurn = isMyTurn(v);
   if (lastSeq === null) lastSeq = v.seq;
   if (v.seq > lastSeq) { const fresh = v.log.filter(l => l.n > lastSeq); const imp = fresh.filter(l => l.kind === 'bust' || l.kind === 'seven' || l.kind === 'action').pop() || fresh[fresh.length - 1]; if (imp && !fxBig) toast(imp.txt, imp.kind); lastSeq = v.seq; }
-  if (myTurn && !wasMyTurn) { buzz([200, 100, 200]); beep(); keepAwake(); }
+  if (myTurn && !wasMyTurn) { buzz([200, 100, 200]); beep(); keepAwake(); syncTurnVibe(); }
+  if (!myTurn) stopTurnVibe();
   wasMyTurn = myTurn;
   let h = `<div class="subrow"><div class="sub" id="roundline">Runde ${v.round} · Spil til ${v.target} · Bunke: ${v.deckCount} kort</div><button class="leave" onclick="leave()">${role === 'host' ? 'Afslut' : 'Forlad'}</button></div>`;
   // værts-hjælp for offline spillere
