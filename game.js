@@ -144,9 +144,9 @@
     }
     if (card === 'et') {
       p.acts.push('et');
-      ev(S, 'extra', { p: i });
-      log(S, nm(S, i) + ' får et ekstra træk', 'action');
-      S.queue.unshift({ t: 'draw', i: i });
+      ev(S, 'extra', { p: i, n: 2 });
+      log(S, nm(S, i) + ' trækker to kort mere', 'action');
+      S.queue.unshift({ t: 'draw', i: i }, { t: 'draw', i: i });
       return;
     }
     if (card === 'pa') {

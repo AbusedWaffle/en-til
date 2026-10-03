@@ -317,7 +317,7 @@ function linkFor(room) {
 }
 const STATUS = { active: 'Aktiv', stopped: 'Stoppet', bust: 'Bust', frozen: 'Frosset' };
 const CARD_NAME = { fr: 'Frys', f3: 'Træk 3', sc: '2. chance', et: 'Ekstra træk', gv: 'Giv væk', pa: 'Pause' };
-const CARD_DESC = { fr: 'Spilleren banker sine point og er ude af runden.', f3: 'Spilleren skal vende de næste 3 kort ét ad gangen.', sc: 'Du har allerede en 2. chance – giv denne til en anden aktiv spiller.', et: 'Du trækker ét kort mere med det samme.', gv: 'Giv et af dine talkort til en anden spiller. Har de tallet i forvejen, går de bust.', pa: 'Du springes over én gang. Du bliver i runden og kan trække igen bagefter.' };
+const CARD_DESC = { fr: 'Spilleren banker sine point og er ude af runden.', f3: 'Spilleren skal vende de næste 3 kort ét ad gangen.', sc: 'Du har allerede en 2. chance – giv denne til en anden aktiv spiller.', et: 'Du trækker to kort mere med det samme. Bust på det første stopper det andet.', gv: 'Giv et af dine talkort til en anden spiller. Har de tallet i forvejen, går de bust.', pa: 'Du springes over én gang. Du bliver i runden og kan trække igen bagefter.' };
 const SPEC_LIST = [['fr','Frys'],['f3','Træk 3'],['sc','2. chance'],['et','Ekstra træk'],['gv','Giv væk'],['pa','Pause']];
 
 // ---------- tilstand ----------
@@ -663,7 +663,7 @@ function fxHtml(o, v) {
       <div class="sub">${Su(e.p)} springes over én gang</div><div class="sm2">Bliver i runden og kan trække igen bagefter</div>` };
     case 'extra': return {
       dur: 1200, html: `<div class="vis"><span class="c big et">+<i>EKSTRA</i></span></div><div class="ttl" style="font-size:clamp(36px,11vw,60px)">Ekstra træk!</div>
-      <div class="sub">${Su(e.p)} trækker ét kort mere</div>` };
+      <div class="sub">${Su(e.p)} trækker to kort mere</div><div class="sm2">Bust på det første stopper det andet</div>` };
     case 'give': return {
       dur: 1600, html: `<div class="vis">${e.card ? cardHtml(e.card, 'big' + (e.bust ? ' dup' : '')) : '<span class="c big gv">➜<i>GIV</i></span>'}</div><div class="ttl" style="font-size:clamp(36px,12vw,64px)">Giv væk!</div>${e.t === undefined ? '' : who(e.p, e.t)}
       <div class="sub">${e.none ? `${Su(e.p)} har ingen talkort` : e.bust ? `${P(e.t)} gik bust` : `${Su(e.p)} gav ${numOf(e.card)} væk`}</div>` };
@@ -723,7 +723,7 @@ function cueText(e, v, after) {
   else if (e.type === 'seven') t = `⭐ SYV! ${Su(e.p)} fik 7 forskellige tal (+15)`;
   else if (e.type === 'win') t = `🏆 ${Su(e.p)} vinder med ${e.pts} point!`;
   else if (e.type === 'pause') t = `Ⅱ Pause! ${Su(e.p)} springes over én gang`;
-  else if (e.type === 'extra') t = `＋ Ekstra træk! ${Su(e.p)} trækker ét kort mere`;
+  else if (e.type === 'extra') t = `＋ Ekstra træk! ${Su(e.p)} trækker to kort mere`;
   else if (e.type === 'give') t = e.none ? `➜ Giv væk uden talkort (${Su(e.p)})` : `➜ ${Su(e.p)} gav ${numOf(e.card)} til ${P(e.t)}${e.bust ? ' – bust' : ''}`;
   return un(t);
 }
@@ -742,7 +742,7 @@ function specLine(e, v) {
   if (e.type === 'give') return e.none ? nm(e.p) + ' trak Giv væk' : nm(e.p) + ' sender ' + numOf(e.card) + ' til ' + nm(e.t);
   if (e.type === 'sc') return e.p === e.t ? nm(e.t) + ' fik en 2. chance' : nm(e.p) + ' sender 2. chance til ' + nm(e.t);
   if (e.type === 'pause') return nm(e.p) + ' springes over én gang';
-  if (e.type === 'extra') return nm(e.p) + ' får et ekstra træk';
+  if (e.type === 'extra') return nm(e.p) + ' trækker to kort mere';
   return '';
 }
 function fxGhost(row, card) {
@@ -908,7 +908,7 @@ function renderLobby() {
   h += `<div class="lbl">Talkort</div><div class="seg deck" id="deckSeg">${[8,12,16].map(n => `<button type="button" data-deck="${n}" class="${max === n ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostDeck(${n})">0–${n}</button>`).join('')}</div>`;
   h += `<div class="lbl">Specialkort</div><div class="specs" id="specList">${SPEC_LIST.map(([k, n]) => `<button type="button" data-spec="${k}" class="${sp[k] ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostSpec('${k}')">${n}</button>`).join('')}</div>`;
   h += `<div class="hint" id="rulesLine">Talkort 0–${max}. Med: ${esc(onNames)}.</div>`;
-  h += `<div class="hint">Ekstra træk: ét kort mere med det samme. Giv væk: giv et af dine tal til en anden (dublet = bust). Pause: springes over én gang, bliver i runden.</div>`;
+  h += `<div class="hint">Ekstra træk: to kort mere med det samme. Bust på det første stopper det andet. Giv væk: giv et af dine tal til en anden (dublet = bust). Pause: springes over én gang, bliver i runden.</div>`;
   const aiN = v.players.filter(p => p.ai).length;
   const maxAi = Math.min(7, 8 - v.players.filter(p => !p.ai).length);
   if (host) h += `<div class="lbl">Modstandere (AI)</div><div class="seg deck ai" id="aiSeg">${[0,1,2,3,4,5,6,7].map(n => `<button type="button" data-ai="${n}" class="${aiN === n ? 'on' : ''}" ${n > maxAi ? 'disabled' : ''} onclick="hostAi(${n})">${n}</button>`).join('')}</div><div class="hint" id="aiHint">${aiN ? 'Computeren spiller med på denne telefon. Ingen andre skal joine.' : '0 = almindeligt spil, hvor andre telefoner joiner.'}</div>`;

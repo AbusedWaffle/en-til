@@ -28,7 +28,7 @@ Målet er at være den første, der når 200 point. Hver runde handler om at tr�
   - **Frys:** Du vælger en spiller (også gerne dig selv), som gemmer sine point og er færdig for runden.
   - **Træk 3:** Du vælger en spiller, som skal trække 3 kort i træk.
   - **2. chance:** Redder dig én gang fra bust.
-  - **Ekstra træk** (fra som standard): Du trækker ét kort mere med det samme. Det kan godt give bust.
+  - **Ekstra træk** (fra som standard): Du trækker to kort mere med det samme. Bust på det første stopper det andet.
   - **Giv væk** (fra som standard): Du giver et af dine talkort til en anden spiller. Har de tallet i forvejen, går de bust. Har du ingen talkort, sker der ingenting.
   - **Pause** (fra som standard): Du springes over én gang. Du bliver i runden og kan trække igen på en senere tur.
   Når du skal vælge en spiller, kommer der en liste frem på din telefon.
