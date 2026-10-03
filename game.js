@@ -336,10 +336,70 @@
     return v;
   }
 
+  var AI_NAMES = ['Kaptajn Kartoffel', 'Fru Bust', 'Grev Kort', 'Baron Bunker', 'Madame Minus', 'Hr. Syv', 'Skipper Stak', 'Tante Træk', 'Professor Plus', 'Kong Kasino'];
+  function aiBase(name) { return String(name || '').replace(/ \(AI\)$/, '').trim().toLowerCase(); }
+  function pickAiNames(taken, n) {
+    var used = {}, out = [], i;
+    (taken || []).forEach(function (t) { used[aiBase(t)] = 1; });
+    for (i = 0; i < AI_NAMES.length && out.length < n; i++) {
+      if (used[aiBase(AI_NAMES[i])]) continue;
+      used[aiBase(AI_NAMES[i])] = 1;
+      out.push(AI_NAMES[i]);
+    }
+    return out;
+  }
+  // Den med flest point i alt, og ved lige højst i runden. Andre foretrækkes frem for en selv.
+  function aiLeader(S, options, from) {
+    var best = -1, bt = -1, br = -1, k, i, t, r;
+    for (k = 0; k < options.length; k++) {
+      i = options[k];
+      if (i === from) continue;
+      t = S.players[i].total; r = roundScore(S.players[i]);
+      if (t > bt || (t === bt && r > br)) { best = i; bt = t; br = r; }
+    }
+    return best < 0 ? options[0] : best;
+  }
+  function aiChoose(S, i) {
+    var P = S.pending, p = S.players[i], target = aiLeader(S, P.options, i), num, have, bustN, k;
+    if (P.card === 'gv') {
+      have = S.players[target].nums;
+      bustN = null;
+      for (k = 0; k < p.nums.length; k++) if (have.indexOf(p.nums[k]) >= 0 && (bustN === null || p.nums[k] > bustN)) bustN = p.nums[k];
+      num = bustN;
+      if (num === null) { num = p.nums[0]; for (k = 1; k < p.nums.length; k++) if (p.nums[k] < num) num = p.nums[k]; }
+      return { pid: p.id, a: 'choose', target: target, num: num };
+    }
+    return { pid: p.id, a: 'choose', target: target };
+  }
+  function aiHit(S, i) {
+    var p = S.players[i], sc, hi, k;
+    if (!canStop(p)) return { pid: p.id, a: 'draw' };
+    sc = roundScore(p); hi = 0;
+    for (k = 0; k < p.nums.length; k++) if (p.nums[k] > hi) hi = p.nums[k];
+    if (sc >= 22) return { pid: p.id, a: 'stop' };
+    if (sc >= 16 && hi >= 9) return { pid: p.id, a: 'stop' };
+    if (sc >= 12 && p.nums.length >= 5) return { pid: p.id, a: 'stop' };
+    return { pid: p.id, a: 'draw' };
+  }
+  // Ét træk for den AI, der skal handle nu. Null hvis det er et menneske, eller ingen skal handle.
+  function aiDecide(S) {
+    var i, p;
+    if (!S || S.phase !== 'play') return null;
+    if (S.pending) {
+      i = S.pending.chooser; p = S.players[i];
+      if (!p || !p.ai) return null;
+      return aiChoose(S, i);
+    }
+    if (S.stage !== 'turns' || S.turn < 0) return null;
+    p = S.players[S.turn];
+    if (!p || !p.ai || !isActive(S, S.turn)) return null;
+    return aiHit(S, S.turn);
+  }
+
   var api = { buildDeck: buildDeck, shuffle: shuffle, label: label, roundScore: roundScore, tableCards: tableCards, createLobby: createLobby,
     addPlayer: addPlayer, startGame: startGame, startRound: startRound, nextRound: nextRound, act: act, process: process, endRound: endRound,
     canStop: canStop, activeIdx: activeIdx, backToLobby: backToLobby, countCards: countCards, publicView: publicView, drawCard: drawCard,
-    normalizeRules: normalizeRules, defaultSpecials: defaultSpecials };
+    normalizeRules: normalizeRules, defaultSpecials: defaultSpecials, aiDecide: aiDecide, pickAiNames: pickAiNames, AI_NAMES: AI_NAMES };
   api.eventsSince = function (S, id) { return (S.events || []).filter(function (e) { return e.id > id; }); };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.EnTil = api;
 })(this);

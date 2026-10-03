@@ -7,7 +7,7 @@
 ## Sådan kommer I ind i spillet
 1. **Værten** (én person) åbner linket, skriver sit navn og opretter et spil. Der vises en spilkode på 5 tegn og en QR-kode.
 2. **De andre** scanner QR-koden med kameraet eller åbner linket, skriver spilkoden og deres navn.
-3. I lobbyen ser alle, hvad der spilles med. Værten vælger **talkort** 0–8, 0–12 (standard, som det kendte spil) eller 0–16, og hvilke **specialkort** der er med. Som standard er Træk 3, Frys og 2. chance med. Ekstra træk, Giv væk og Pause er slået fra, indtil værten tænder dem. Værten vælger også, hvor mange point der spilles til (200 som standard), og trykker **Start spil**. Man kan være 2 til 8 spillere.
+3. I lobbyen ser alle, hvad der spilles med. Værten vælger **talkort** 0–8, 0–12 (standard, som det kendte spil) eller 0–16, og hvilke **specialkort** der er med. Som standard er Træk 3, Frys og 2. chance med. Ekstra træk, Giv væk og Pause er slået fra, indtil værten tænder dem. Værten vælger også, hvor mange point der spilles til (200 som standard), og hvor mange **AI-modstandere** (0–7). 0 er et almindeligt spil, hvor andre telefoner joiner. 1–7 starter på værtens telefon alene: computeren sidder med det samme og spiller selv, med navne som Kaptajn Kartoffel (AI). Tryk **Start spil**. Man kan være 2 til 8 spillere.
 
 Tip: Tryk på del-knappen i browseren og vælg **Føj til hjemmeskærm**, så ligger spillet som en app på telefonen.
 

@@ -54,6 +54,7 @@ button:disabled{opacity:.35}
 .pr .nm{font-size:15px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.15;display:flex;align-items:center;gap:4px;min-width:0}
 .pr .nm b{overflow:hidden;text-overflow:ellipsis}
 .dig{flex:none;font-size:10px;font-weight:800;background:#10192ecc;color:#fff;border-radius:8px;padding:1px 5px;line-height:1.4}
+.ain{flex:none;font-weight:800;font-size:11px;color:#ffcf40}
 .pr.turn .dig{background:#0b3d1ccc}
 .meta{display:flex;gap:4px;align-items:center;flex-wrap:wrap;min-width:0}
 .giver{font-size:10px;font-weight:800;color:#ffcf40;white-space:nowrap}
@@ -220,6 +221,8 @@ td.n{text-align:right;font-weight:800}
 .specs button{padding:8px 10px;font-size:14px;background:#0d1628;color:#cfd9ee}
 .specs button.on{background:#ffcf40;color:#10192e}
 .seg.deck button{flex:1;padding:12px 4px}
+.seg.ai{flex-wrap:wrap}
+.seg.ai button{flex:1 0 36px;padding:10px 0}
 #fx.sc .ttl,#fx.save .ttl{color:#fff;text-shadow:0 4px 0 #7a0f22,0 0 26px #ff6b86}
 .shield{width:120px;height:120px;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;background:radial-gradient(circle at 50% 35%,#ff8aa0,#e0485f 60%,#9b1330);display:flex;align-items:center;justify-content:center;font-size:64px;color:#fff;box-shadow:0 0 0 6px #ffffff33,0 0 40px 10px #ff6b8699;animation:icein .7s cubic-bezier(.2,1.3,.4,1) both,shglow 1s .7s ease-in-out infinite alternate}
 @keyframes shglow{to{box-shadow:0 0 0 10px #ffffff22,0 0 60px 20px #ff6b86cc}}
@@ -482,6 +485,36 @@ function hostAct(a) {
 }
 function hostActFor(pid, a) { if (role !== 'host') return; const r = G.act(S, pid, a); if (!r.ok) toast(r.err); publish(); }
 function hostStart() { const t = parseInt(($('target') || {}).value, 10); if (t > 0) S.target = t; const r = G.startGame(S); if (!r.ok) return toast(r.err); publish(); }
+function hostAi(n) {
+  n = +n;
+  if (role !== 'host' || !S || S.phase !== 'lobby' || n < 0 || n > 7) return;
+  const humans = S.players.filter(p => !p.ai);
+  if (humans.length + n > 8) n = 8 - humans.length;
+  S.players = humans;
+  G.pickAiNames(humans.map(p => p.name), n).forEach((name, i) => {
+    const p = G.addPlayer(S, 'ai' + i + Math.random().toString(36).slice(2, 7), name + ' (AI)');
+    p.ai = true;
+  });
+  publish();
+}
+let aiTimer = null, aiPlan = null;
+function stopAi() { clearTimeout(aiTimer); aiTimer = null; aiPlan = null; }
+function scheduleAi() {
+  if (role !== 'host' || !S || !view || view.phase === 'lobby') { stopAi(); return; }
+  const d = G.aiDecide(S);
+  if (!d) { stopAi(); return; }
+  const key = (S.pending ? 'p' + S.pending.chooser + S.pending.card : 't' + S.turn) + ':' + (S.evSeq || 0);
+  if (aiPlan === key) return;
+  clearTimeout(aiTimer);
+  aiPlan = key;
+  aiTimer = setTimeout(() => {
+    aiPlan = null;
+    if (role !== 'host' || !S) return;
+    const now = G.aiDecide(S);
+    if (!now || now.pid !== d.pid) return;
+    hostActFor(now.pid, { a: now.a, target: now.target, num: now.num });
+  }, 600 + Math.floor(Math.random() * 601));
+}
 function hostNext() { G.nextRound(S); publish(); }
 function hostNewGame() { G.backToLobby(S); publish(); }
 function hostKick(pid) { const i = S.players.findIndex(p => p.id === pid); if (i <= 0 || S.phase !== 'lobby') return; const c = conns[pid]; if (c) { send(c, { t: 'reject', reason: 'Værten fjernede dig fra spillet.' }); delete conns[pid]; setTimeout(() => c.close(), 500); } S.players.splice(i, 1); publish(); }
@@ -551,7 +584,7 @@ document.addEventListener('visibilitychange', () => {
 function leave() {
   const msg = role === 'host' ? 'Afslut spillet? Du er vært, så spillet stopper for alle.' : 'Forlad spillet?';
   if (!confirm(msg)) return;
-  stopTurnVibe();
+  stopTurnVibe(); stopAi();
   if (role === 'host') { Object.values(conns).forEach(c => send(c, { t: 'reject', reason: 'Værten har afsluttet spillet.' })); LS.del('host-' + room); }
   LS.del('session');
   setTimeout(() => { try { peer && peer.destroy(); } catch (e) {} location.href = location.pathname + '?' + new URLSearchParams([...qs].filter(([k]) => PEER_KEYS.includes(k))).toString(); }, 300);
@@ -830,13 +863,14 @@ function render() {
   if (role === 'client' && !rejected && view && connState !== 'online') {
     ov.innerHTML = `<div class="overlay"><div class="box"><div class="spin"></div><h2>Forbindelsen til værten er tabt</h2><p class="hint">${esc(errMsg || 'Prøver at genoprette forbindelsen…')}</p><p class="hint">Du kommer automatisk tilbage i spillet med dine kort, når forbindelsen er genoprettet.</p><button class="ghost" onclick="leave()">Forlad spillet</button></div></div>`;
   } else ov.innerHTML = '';
-  if (!role || rejected) return renderHome();
-  if (!view) return renderConnecting();
+  if (!role || rejected) { stopAi(); return renderHome(); }
+  if (!view) { stopAi(); return renderConnecting(); }
   const fresh = takeEvents(view);
-  if (view.phase === 'lobby') return renderLobby();
+  if (view.phase === 'lobby') { stopAi(); return renderLobby(); }
   fxBig = fresh.some(e => FX_BIG[e.type]);
   renderGame();
   if (fresh.length) playEvents(fresh, view);
+  scheduleAi();
 }
 function renderConnecting() {
   $('bottom').style.display = 'none'; $('modal').classList.remove('show');
@@ -867,7 +901,7 @@ function renderLobby() {
   let h = '';
   if (errMsg) h += `<div class="err">${esc(errMsg)}</div>`;
   h += `<div class="card" style="text-align:center"><div class="hint">${host ? 'Lad de andre scanne koden eller skrive spilkoden' : 'Du er med! Venter på at værten starter spillet…'}</div><div class="roomcode" id="roomcode">${esc(room)}</div><div class="qr">${qr}</div><div class="link">${esc(link)}</div>${host && navigator.share ? `<button class="ghost" style="margin-top:10px" onclick="navigator.share({title:'FlipX',text:'Spil FlipX med mig',url:'${esc(link)}'}).catch(()=>{})">Del link</button>` : ''}</div>`;
-  h += `<div class="card"><div class="lbl" style="margin-top:0">Spillere (${v.players.length}/8)</div><div class="plist">` + v.players.map((p, i) => `<div class="pl"><span class="dot ${p.online ? 'on' : 'off'}"></span><span class="grow">${esc(p.name)}${p.id === myId ? ' (dig)' : ''}${i === 0 ? ' 👑' : ''}</span>${host && i > 0 ? `<button class="x" onclick="hostKick('${esc(p.id)}')">✕</button>` : ''}</div>`).join('') + '</div>';
+  h += `<div class="card"><div class="lbl" style="margin-top:0">Spillere (${v.players.length}/8)</div><div class="plist">` + v.players.map((p, i) => `<div class="pl"><span class="dot ${p.online ? 'on' : 'off'}"></span><span class="grow">${esc(p.name)}${p.id === myId ? ' (dig)' : ''}${i === 0 ? ' 👑' : ''}</span>${host && i > 0 && !p.ai ? `<button class="x" onclick="hostKick('${esc(p.id)}')">✕</button>` : ''}</div>`).join('') + '</div>';
   const sp = v.specials || { fr: true, f3: true, sc: true, et: false, gv: false, pa: false };
   const max = v.deckMax || 12;
   const onNames = SPEC_LIST.filter(([k]) => sp[k]).map(([, n]) => n).join(', ') || 'ingen';
@@ -875,6 +909,9 @@ function renderLobby() {
   h += `<div class="lbl">Specialkort</div><div class="specs" id="specList">${SPEC_LIST.map(([k, n]) => `<button type="button" data-spec="${k}" class="${sp[k] ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostSpec('${k}')">${n}</button>`).join('')}</div>`;
   h += `<div class="hint" id="rulesLine">Talkort 0–${max}. Med: ${esc(onNames)}.</div>`;
   h += `<div class="hint">Ekstra træk: ét kort mere med det samme. Giv væk: giv et af dine tal til en anden (dublet = bust). Pause: springes over én gang, bliver i runden.</div>`;
+  const aiN = v.players.filter(p => p.ai).length;
+  const maxAi = Math.min(7, 8 - v.players.filter(p => !p.ai).length);
+  if (host) h += `<div class="lbl">Modstandere (AI)</div><div class="seg deck ai" id="aiSeg">${[0,1,2,3,4,5,6,7].map(n => `<button type="button" data-ai="${n}" class="${aiN === n ? 'on' : ''}" ${n > maxAi ? 'disabled' : ''} onclick="hostAi(${n})">${n}</button>`).join('')}</div><div class="hint" id="aiHint">${aiN ? 'Computeren spiller med på denne telefon. Ingen andre skal joine.' : '0 = almindeligt spil, hvor andre telefoner joiner.'}</div>`;
   if (host) h += `<div class="lbl">Spil til (point)</div><input type="number" id="target" inputmode="numeric" value="${v.target}" onchange="hostTarget(this.value)"><button class="primary" id="btnStart" style="margin-top:14px;height:60px;font-size:20px" onclick="hostStart()" ${v.players.length < 2 ? 'disabled' : ''}>${v.players.length < 2 ? 'Venter på spillere…' : `Start spil (${v.players.length} spillere)`}</button>`;
   else h += `<div class="hint">Der spilles til ${v.target} point. Værten vælger bunke og specialkort.</div>`;
   h += `</div><button class="ghost" style="width:100%" onclick="leave()">${host ? 'Afslut spil' : 'Forlad spil'}</button>`;
@@ -895,7 +932,7 @@ function renderGame() {
   if (role === 'host' && v.phase === 'play') {
     const actor = v.pending ? v.pending.chooser : (v.stage === 'turns' ? v.turn : -1);
     const ap = actor >= 0 && v.players[actor];
-    if (ap && !ap.online && ap.id !== myId) {
+    if (ap && !ap.online && !ap.ai && ap.id !== myId) {
       h += `<div class="hostfix">⚠️ <b>${esc(ap.name)}</b> er offline. Vent på at telefonen kommer tilbage, eller spil for dem:`;
       if (v.pending) h += `<button class="ghost" onclick="hostActFor('${esc(ap.id)}',{a:'choose',target:${v.pending.options[0]}${v.pending.card === 'gv' ? ',num:' + (ap.nums[0] || 0) : ''}})">Giv ${CARD_NAME[v.pending.card]} til ${esc(v.players[v.pending.options[0]].name)}</button>`;
       else { if (G.canStop(ap)) h += `<button class="ghost" onclick="hostActFor('${esc(ap.id)}',{a:'stop'})">Stop for ${esc(ap.name)}</button>`; h += `<button class="ghost" onclick="hostActFor('${esc(ap.id)}',{a:'draw'})">Træk for ${esc(ap.name)}</button>`; }
@@ -909,7 +946,7 @@ function renderGame() {
   const mid = !dense && (v.players.length >= 5 || cardsMax >= 4);
   h += `<div class="grid${dense ? ' crowded' : mid ? ' mid' : ''}" id="grid">` + v.players.map((p, i) => {
     const st = p.seven ? 'seven' : p.status;
-    return `<div class="pr${i === actor ? ' turn' : ''}${st === 'bust' ? ' is-bust' : ''}" data-p="${i}"><span class="nm"><b>${esc(p.name)}</b>${p.id === myId ? '<span class="dig">Dig</span>' : ''}</span><span class="pts">${G.roundScore(p)}<small>${p.total} i alt</small></span><span class="meta">${statusChip(p)}${p.skip ? '<span class="giver">over 1×</span>' : ''}${i === v.dealer ? '<span class="giver">giver</span>' : ''}${p.online ? '' : '<span class="offsmall">offline</span>'}</span><div class="sm">${handHtml(p, false)}</div></div>`;
+    return `<div class="pr${i === actor ? ' turn' : ''}${st === 'bust' ? ' is-bust' : ''}" data-p="${i}"><span class="nm"><b>${esc(p.ai ? String(p.name).replace(/ \(AI\)$/, '') : p.name)}</b>${p.ai ? '<span class="ain"> (AI)</span>' : ''}${p.id === myId ? '<span class="dig">Dig</span>' : ''}</span><span class="pts">${G.roundScore(p)}<small>${p.total} i alt</small></span><span class="meta">${statusChip(p)}${p.skip ? '<span class="giver">over 1×</span>' : ''}${i === v.dealer ? '<span class="giver">giver</span>' : ''}${p.online ? '' : '<span class="offsmall">offline</span>'}</span><div class="sm">${handHtml(p, false)}</div></div>`;
   }).join('') + '</div>';
   $('app').innerHTML = h;
   // knapper
