@@ -919,7 +919,7 @@ function renderHome() {
   const create = `<div class="card"><h3 style="margin:0 0 4px">Opret nyt spil</h3><div class="hint">Din telefon bliver vært. Hold den tændt og med appen åben under spillet.</div><div class="lbl">Spil til (point)</div><input type="number" id="tgt" inputmode="numeric" value="200"><button class="primary" id="btnCreate" style="margin-top:12px" onclick="doCreate()">Opret spil</button></div>`;
   if (sess && !qroom && !rejected) h += `<div class="card"><button class="ghost" style="width:100%" onclick="location.href='${esc(linkFor(sess.room))}'">↻ Genoptag spil ${esc(sess.room)}</button></div>`;
   h += qroom ? join + create : create + join;
-  h += `<div class="card hint">Tip: Tryk på del-knappen i Safari/Chrome og vælg <b>“Føj til hjemmeskærm”</b>, så ligger spillet som en app.<br>Alle spillere skal have internet. Telefonerne forbindes direkte med hinanden.</div>`;
+  h += `<div class="card hint">Tip: På Android: installer via <b>Chrome</b> (menu → Installer app / Føj til startskærm). Hvis Samsung Internet viser Play Protect, brug Chrome — eller tryk <b>Installer alligevel</b>. På iPhone: del → Føj til hjemmeskærm.<br>Alle spillere skal have internet. Telefonerne forbindes direkte med hinanden.</div>`;
   $('app').innerHTML = h;
 }
 function getName() { const n = ($('name').value || '').trim().slice(0, 16); if (!n) { toast('Skriv dit navn først'); $('name').focus(); return null; } myName = n; LS.set('name', n); return n; }
@@ -1188,4 +1188,15 @@ function kickRecord() {
 })();
 </script>
 <script type="module" src="board.js"></script>
+
+<script>
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+  var ok = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if (!ok) return;
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function () {});
+  });
+})();
+</script>
 </body></html>
