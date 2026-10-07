@@ -78,6 +78,18 @@ button:disabled{opacity:.35}
 .grid.crowded .sm .c.mod{font-size:11px}
 .grid.crowded .pr .pts{font-size:22px}
 .grid.crowded .pr{padding:5px 6px}
+/* tilpasset gitter (fitGrid) */
+body.ingame .disc{display:none}
+.grid.fit{align-content:stretch;overflow:hidden}
+.grid.fit .pr{min-height:0;overflow:hidden;position:relative;padding:calc(var(--fs,15px)*.45) calc(var(--fs,15px)*.55)}
+.grid.fit .pr .nm{font-size:var(--fs,15px)}
+.grid.fit .pr .pts{font-size:calc(var(--fs,15px)*1.75)}
+.grid.fit .pr .pts small{font-size:calc(var(--fs,15px)*.68)}
+.grid.fit .status,.grid.fit .giver,.grid.fit .dig{font-size:calc(var(--fs,15px)*.68)}
+.grid.fit .sm{gap:var(--cg,3px);align-content:flex-start}
+.grid.fit .sm .c{width:var(--cw,30px);height:calc(var(--cw,30px)*1.34);font-size:calc(var(--cw,30px)*.56);border-radius:calc(var(--cw,30px)*.16)}
+.grid.fit .sm .c.mod,.grid.fit .sm .c.fr,.grid.fit .sm .c.f3,.grid.fit .sm .c.sc,.grid.fit .sm .c.et,.grid.fit .sm .c.gv,.grid.fit .sm .c.pa{font-size:calc(var(--cw,30px)*.4)}
+.grid.fit .bustx{font-size:calc(var(--fs,15px)*3.6)}
 body.ingame header{padding:6px 10px}
 body.ingame h1{font-size:18px}
 body.ingame main{padding:0 6px calc(76px + env(safe-area-inset-bottom))}
@@ -893,6 +905,39 @@ function keepInput(fn) {
   fn();
   if (id && $(id)) { const e = $(id); if (e.value !== val) e.value = val; e.focus(); try { e.setSelectionRange(ss, ss); } catch (x) {} }
 }
+// Gitteret fylder pladsen mellem toplinjen og bundbaren; kort/tekst skaleres efter brikstørrelse.
+const GRID_LAYOUT = { 1: [1, 1], 2: [1, 2], 3: [1, 3], 4: [2, 2], 5: [2, 3], 6: [2, 3], 7: [2, 4], 8: [2, 4] };
+function fitGrid() {
+  const g = document.getElementById('grid'); if (!g) return;
+  const tiles = [...g.querySelectorAll('.pr')]; const n = tiles.length; if (!n) return;
+  const [cols, rows] = GRID_LAYOUT[n] || [2, Math.ceil(n / 2)];
+  const bar = document.getElementById('bottom');
+  const barH = bar && bar.style.display !== 'none' ? bar.getBoundingClientRect().height : 0;
+  const top = g.getBoundingClientRect().top + window.scrollY;
+  const padB = parseFloat(getComputedStyle(document.querySelector('main')).paddingBottom) || 0;
+  const H = Math.max(120, Math.floor(window.innerHeight - top - Math.max(barH + 6, padB) - 2));
+  g.classList.add('fit'); g.classList.remove('crowded', 'mid');
+  g.style.gridTemplateColumns = `repeat(${cols},minmax(0,1fr))`;
+  g.style.gridTemplateRows = `repeat(${rows},minmax(0,1fr))`;
+  g.style.height = H + 'px';
+  const gap = 6, th = (H - gap * (rows - 1)) / rows, tw = (g.clientWidth - gap * (cols - 1)) / cols;
+  const fs = Math.max(12, Math.min(22, th / 7, tw / 9));
+  g.style.setProperty('--fs', fs.toFixed(1) + 'px');
+  const maxCards = Math.max(1, ...tiles.map(t => t.querySelectorAll('.sm .c').length));
+  // plads til kort: brikhøjde minus navn/meta-linjer og polstring
+  const tile0 = tiles[0], sm0 = tile0.querySelector('.sm');
+  const head = sm0 ? sm0.getBoundingClientRect().top - tile0.getBoundingClientRect().top : fs * 3;
+  const availH = th - head - fs * 0.6 - 2, availW = tw - fs * 1.1 - 2;
+  const cg = Math.max(2, Math.round(fs / 5));
+  let cw = Math.min(80, Math.floor(availW / 4));
+  for (; cw > 14; cw--) {
+    const perRow = Math.max(1, Math.floor((availW + cg) / (cw + cg)));
+    const r = Math.ceil(maxCards / perRow);
+    if (r * (cw * 1.34 + cg) - cg <= availH) break;
+  }
+  g.style.setProperty('--cw', cw + 'px'); g.style.setProperty('--cg', cg + 'px');
+}
+window.addEventListener('resize', () => fitGrid());
 function render() {
   setPill();
   document.body.classList.toggle('ingame', !!(view && view.phase && view.phase !== 'lobby' && role && !rejected));
@@ -1002,6 +1047,7 @@ function renderGame() {
   const b = $('bottom'); b.style.display = v.phase === 'play' ? 'flex' : 'none';
   b.className = 'bottom' + (canAct ? ' go' : '');
   b.innerHTML = `<button class="stop" id="btnStop" ${canAct && G.canStop(mp) ? '' : 'disabled'} onclick="hostAct({a:'stop'})">Stop</button><button class="draw" id="btnDraw" ${canAct ? '' : 'disabled'} onclick="hostAct({a:'draw'})">Træk kort</button>`;
+  fitGrid();
   // modal: målvalg / rundeslut / spilslut
   const m = $('modal'), sh = $('sheet');
   if (v.phase === 'play' && v.pending && v.pending.card === 'gv' && v.pending.chooser === meIdx) {
