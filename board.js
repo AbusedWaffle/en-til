@@ -1,11 +1,23 @@
 // Rangliste mod Firebase. Kun denne telefons players/{uid} skrives.
 // Hver enhed logger anonymt ind og får et stabilt uid. Tallene gemmes automatisk ved spillets slut.
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
-import { getAuth, signInAnonymously, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
-import { firebaseConfig } from './firebase-config.js';
-
-const mock = window.__FLIPX_MOCK || null;
+// Tests (headless/webdriver eller ?nofb=1) må aldrig skrive til den rigtige rangliste.
+// Så bruges en lokal mock, og Firebase indlæses slet ikke.
+let noFb = false;
+try { noFb = !!navigator.webdriver || new URLSearchParams(location.search).has('nofb'); } catch (e) {}
+const mock = window.__FLIPX_MOCK || (noFb ? (window.__FLIPX_MOCK = { uid: 'test-uid', players: [], writes: [], offline: true }) : null);
+window.flipNoFb = noFb;
+let initializeApp, getAuth, signInAnonymously, setPersistence, browserLocalPersistence;
+let getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, firebaseConfig;
+async function loadSdk() {
+  const V = 'https://www.gstatic.com/firebasejs/12.19.0/';
+  const [a, au, fs, cfg] = await Promise.all([
+    import(V + 'firebase-app.js'), import(V + 'firebase-auth.js'), import(V + 'firebase-firestore.js'), import('./firebase-config.js')
+  ]);
+  ({ initializeApp } = a);
+  ({ getAuth, signInAnonymously, setPersistence, browserLocalPersistence } = au);
+  ({ getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs } = fs);
+  ({ firebaseConfig } = cfg);
+}
 const G = window.EnTil;
 let db = null;
 let auth = null;
@@ -31,6 +43,7 @@ const ready = (async () => {
     if (uid) { try { localStorage.setItem('f7o-uid', JSON.stringify(uid)); } catch (e) {} }
     return uid;
   }
+  try { await loadSdk(); } catch (e) { window.flipUid = ''; noteFail(e); return ''; }
   const app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
