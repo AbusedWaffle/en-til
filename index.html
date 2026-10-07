@@ -131,6 +131,19 @@ body.ingame .disc{margin:6px 4px 0;padding-bottom:2px}
 .sheet h2{margin:0 0 6px;font-size:24px}
 .pick button{display:flex;width:100%;justify-content:space-between;align-items:center;margin-bottom:8px;background:#22345a;color:#fff;font-size:19px;padding:16px}
 .pick button b{color:#ffcf40}
+.pick button .who{display:flex;align-items:center;gap:6px;min-width:0;text-align:left}
+.pick button .who .ain{font-size:13px}
+.pick button .who .ds{font-size:15px;font-weight:600;color:#9fb0d0}
+.pick button .sc2{display:flex;flex-direction:column;align-items:flex-end;line-height:1;flex:none;margin-left:10px}
+.pick button .sc2 b{font-size:24px;font-weight:900}
+.pick button .sc2 small{font-size:13px;font-weight:700;color:#c5d2ea;margin-top:4px;white-space:nowrap}
+.pick button .sc2 small em{font-style:normal;color:#fff}
+.c.mini{width:34px;height:46px;font-size:20px;border-radius:7px;vertical-align:middle;box-shadow:none;margin:0 2px}
+.c.mini i{display:none}
+.gvc{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px}
+.gvc button{background:#22345a;border-radius:14px;padding:12px 0 10px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#9fb0d0;font-size:12px;font-weight:700}
+.gvc button .c{width:62px;height:86px;font-size:40px;border-radius:10px}
+.gvc button:active{background:#2b3d63}
 table{width:100%;border-collapse:collapse;font-size:16px;margin:8px 0 12px}
 th,td{padding:8px 4px;text-align:left;border-bottom:1px solid #2b3d63}
 th{color:#9fb0d0;font-weight:500;font-size:13px}
@@ -1011,6 +1024,11 @@ function renderLobby() {
   keepInput(() => { $('app').innerHTML = h; });
 }
 
+function pickRow(v, i, meIdx) {
+  const p = v.players[i];
+  const nm = p.ai ? String(p.name).replace(/ \(AI\)$/, '') : p.name;
+  return `<span class="who"><span>${esc(nm)}</span>${p.ai ? '<span class="ain">(AI)</span>' : ''}${i === meIdx ? '<span class="ds">(dig selv)</span>' : ''}</span><span class="sc2"><b>${G.roundScore(p)} p</b><small>I alt <em>${p.total}</em></small></span>`;
+}
 function renderGame() {
   const v = view, meIdx = v.players.findIndex(p => p.id === myId), mp = v.players[meIdx];
   const myTurn = isMyTurn(v);
@@ -1053,15 +1071,15 @@ function renderGame() {
   if (v.phase === 'play' && v.pending && v.pending.card === 'gv' && v.pending.chooser === meIdx) {
     const P = v.pending;
     if (gvNum == null || P.numbers.indexOf(gvNum) < 0) {
-      sh.innerHTML = `<h2>Giv væk</h2><p class="hint">Vælg et af dine talkort. Har modtageren tallet i forvejen, går de bust.</p><div class="pick" id="pick">${P.numbers.map(n => `<button type="button" data-n="${n}" onclick="gvNum=${n};render()"><span>${n}</span></button>`).join('')}</div>`;
+      sh.innerHTML = `<h2>Giv væk</h2><p class="hint">Vælg et af dine talkort. Har modtageren tallet i forvejen, går de bust.</p><div class="gvc" id="pick">${P.numbers.map(n => `<button type="button" data-n="${n}" onclick="gvNum=${n};render()">${cardHtml('n' + n)}</button>`).join('')}</div>`;
     } else {
-      sh.innerHTML = `<h2>Giv ${gvNum} til…</h2><p class="hint"><button class="ghost" type="button" onclick="gvNum=null;render()">← Vælg et andet tal</button></p><div class="pick" id="pick">${P.options.map(i => `<button data-t="${i}" ${sending ? 'disabled' : ''} onclick="hostAct({a:'choose',target:${i},num:${gvNum}})"><span>${esc(v.players[i].name)}</span><b>${G.roundScore(v.players[i])} p</b></button>`).join('')}</div>`;
+      sh.innerHTML = `<h2>Giv ${cardHtml('n' + gvNum, 'mini')} til…</h2><p class="hint"><button class="ghost" type="button" onclick="gvNum=null;render()">← Vælg et andet tal</button></p><div class="pick" id="pick">${P.options.map(i => `<button data-t="${i}" ${sending ? 'disabled' : ''} onclick="hostAct({a:'choose',target:${i},num:${gvNum}})">${pickRow(v, i, meIdx)}</button>`).join('')}</div>`;
     }
     m.classList.add('show');
   } else if (v.phase === 'play' && v.pending && v.pending.chooser === meIdx) {
     const P = v.pending;
-    sh.innerHTML = `<h2>Du trak ${cardHtml(P.card).replace('class="c', 'class="c" style="width:34px;height:46px;font-size:18px;vertical-align:middle').replace(/<i>.*<\/i>/, '')} ${CARD_NAME[P.card]}</h2><p class="hint">${CARD_DESC[P.card]} Vælg en spiller:</p><div class="pick" id="pick">` +
-      P.options.map(i => `<button data-t="${i}" ${sending ? 'disabled' : ''} onclick="hostAct({a:'choose',target:${i}})"><span>${esc(v.players[i].name)}${i === meIdx ? ' (dig selv)' : ''}</span><b>${G.roundScore(v.players[i])} p</b></button>`).join('') + '</div>';
+    sh.innerHTML = `<h2>Du trak ${cardHtml(P.card, 'mini')} ${CARD_NAME[P.card]}</h2><p class="hint">${CARD_DESC[P.card]} Vælg en spiller:</p><div class="pick" id="pick">` +
+      P.options.map(i => `<button data-t="${i}" ${sending ? 'disabled' : ''} onclick="hostAct({a:'choose',target:${i}})">${pickRow(v, i, meIdx)}</button>`).join('') + '</div>';
     m.classList.add('show');
   } else if (v.phase === 'over') {
     const ranked = G.gameRanking(v.players);
