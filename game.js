@@ -454,30 +454,10 @@
     });
   }
 
-  // Kodeord er kun en lokal nøgle. Tom streng er gyldig (så gemmes intet). For kort er en fejl.
-  function normalizeKodeord(s) {
-    return String(s == null ? '' : s).trim().normalize('NFC');
-  }
-  function kodeordProblem(s) {
-    var k = normalizeKodeord(s);
-    if (!k) return '';
-    if (k.length < 6) return 'Kodeordet skal være mindst 6 tegn.';
-    return '';
-  }
-  function kodeordEmail(s) {
-    var k = normalizeKodeord(s);
-    var data = new TextEncoder().encode(k);
-    return crypto.subtle.digest('SHA-256', data).then(function (buf) {
-      var bytes = new Uint8Array(buf), hex = '', i, h;
-      for (i = 0; i < bytes.length; i++) { h = bytes[i].toString(16); if (h.length < 2) h = '0' + h; hex += h; }
-      return hex + '@flipx.invalid';
-    });
-  }
-
   var api = { buildDeck: buildDeck, shuffle: shuffle, label: label, roundScore: roundScore, tableCards: tableCards, createLobby: createLobby,
     addPlayer: addPlayer, startGame: startGame, startRound: startRound, nextRound: nextRound, act: act, process: process, endRound: endRound,
     canStop: canStop, activeIdx: activeIdx, backToLobby: backToLobby, countCards: countCards, publicView: publicView, drawCard: drawCard,
-    normalizeRules: normalizeRules, defaultSpecials: defaultSpecials, aiDecide: aiDecide, pickAiNames: pickAiNames, AI_NAMES: AI_NAMES, gameRanking: gameRanking, winPercent: winPercent, formatPercent: formatPercent, nextCareer: nextCareer, sortBoard: sortBoard, normalizeKodeord: normalizeKodeord, kodeordProblem: kodeordProblem, kodeordEmail: kodeordEmail };
+    normalizeRules: normalizeRules, defaultSpecials: defaultSpecials, aiDecide: aiDecide, pickAiNames: pickAiNames, AI_NAMES: AI_NAMES, gameRanking: gameRanking, winPercent: winPercent, formatPercent: formatPercent, nextCareer: nextCareer, sortBoard: sortBoard };
   api.eventsSince = function (S, id) { return (S.events || []).filter(function (e) { return e.id > id; }); };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.EnTil = api;
 })(this);
