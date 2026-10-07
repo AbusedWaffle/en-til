@@ -547,7 +547,7 @@ function scheduleAi() {
   }, 600 + Math.floor(Math.random() * 601));
 }
 function hostNext() { G.nextRound(S); publish(); }
-function hostNewGame() { G.backToLobby(S); publish(); }
+function hostNewGame() { G.backToLobby(S); G.renameAi(S); publish(); }
 function hostKick(pid) { const i = S.players.findIndex(p => p.id === pid); if (i <= 0 || S.phase !== 'lobby') return; const c = conns[pid]; if (c) { send(c, { t: 'reject', reason: 'Værten fjernede dig fra spillet.' }); delete conns[pid]; setTimeout(() => c.close(), 500); } S.players.splice(i, 1); publish(); }
 function hostTarget(v) { const t = parseInt(v, 10); if (t > 0 && S.phase === 'lobby') { S.target = t; publish(); } }
 function hostDeck(n) { n = +n; if (role !== 'host' || !S || S.phase !== 'lobby' || [8,12,16].indexOf(n) < 0) return; S.deckMax = n; publish(); }

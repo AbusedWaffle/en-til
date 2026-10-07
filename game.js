@@ -346,17 +346,26 @@
     return v;
   }
 
-  var AI_NAMES = ['Kaptajn Kartoffel', 'Fru Bust', 'Grev Kort', 'Baron Bunker', 'Madame Minus', 'Hr. Syv', 'Skipper Stak', 'Tante Træk', 'Professor Plus', 'Kong Kasino'];
+  var AI_NAMES = ['Kaptajn Kartoffel', 'Fru Bust', 'Grev Kort', 'Baron Bunker', 'Madame Minus', 'Hr. Syv', 'Skipper Stak', 'Tante Træk', 'Professor Plus', 'Kong Kasino', 'Onkel Ombyt', 'Frk. Flip', 'Doktor Dobbelt', 'Bedste Bluff', 'Hr. Heldig', 'Fru Fumle', 'Sir Stop', 'Lady Lykke', 'Major Makker', 'Grevinde Gæt', 'Mester Minus', 'Fætter Flaks', 'Kusine Kort', 'Hertug Hjerte', 'Bager Bunke', 'Pastor Point', 'Ridder Risiko', 'Frøken Flaks', 'Admiral Ace', 'Nisse Nul', 'Hr. Hasard', 'Fru Flipflop', 'Konsul Kaos', 'Smukke Syver', 'Lille Lotto', 'Tømrer Tæller', 'Jarl Joker', 'Kok Krone', 'Bonde Bonus', 'Pirat Plat'];
   function aiBase(name) { return String(name || '').replace(/ \(AI\)$/, '').trim().toLowerCase(); }
-  function pickAiNames(taken, n) {
-    var used = {}, out = [], i;
-    (taken || []).forEach(function (t) { used[aiBase(t)] = 1; });
-    for (i = 0; i < AI_NAMES.length && out.length < n; i++) {
-      if (used[aiBase(AI_NAMES[i])]) continue;
-      used[aiBase(AI_NAMES[i])] = 1;
-      out.push(AI_NAMES[i]);
+  // Tilfældige, unikke navne (Fisher-Yates med injiceret rng), springer menneskers navne over
+  function pickAiNames(taken, n, rng) {
+    rng = rng || Math.random;
+    var used = {}, out = [], pool = AI_NAMES.slice(), i, j, t;
+    for (i = pool.length - 1; i > 0; i--) { j = Math.floor(rng() * (i + 1)); t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+    (taken || []).forEach(function (x) { used[aiBase(x)] = 1; });
+    for (i = 0; i < pool.length && out.length < n; i++) {
+      if (used[aiBase(pool[i])]) continue;
+      used[aiBase(pool[i])] = 1;
+      out.push(pool[i]);
     }
     return out;
+  }
+  // Giv eksisterende AI-spillere nye navne (fx ved Nyt spil)
+  function renameAi(S, rng) {
+    var ais = S.players.filter(function (p) { return p.ai; });
+    var fresh = pickAiNames(S.players.filter(function (p) { return !p.ai; }).map(function (p) { return p.name; }), ais.length, rng);
+    ais.forEach(function (p, k) { if (fresh[k]) p.name = fresh[k] + ' (AI)'; });
   }
   // Den med flest point i alt, og ved lige højst i runden. Andre foretrækkes frem for en selv.
   function aiLeader(S, options, from) {
@@ -457,7 +466,7 @@
   var api = { buildDeck: buildDeck, shuffle: shuffle, label: label, roundScore: roundScore, tableCards: tableCards, createLobby: createLobby,
     addPlayer: addPlayer, startGame: startGame, startRound: startRound, nextRound: nextRound, act: act, process: process, endRound: endRound,
     canStop: canStop, activeIdx: activeIdx, backToLobby: backToLobby, countCards: countCards, publicView: publicView, drawCard: drawCard,
-    normalizeRules: normalizeRules, defaultSpecials: defaultSpecials, aiDecide: aiDecide, pickAiNames: pickAiNames, AI_NAMES: AI_NAMES, gameRanking: gameRanking, winPercent: winPercent, formatPercent: formatPercent, nextCareer: nextCareer, sortBoard: sortBoard };
+    normalizeRules: normalizeRules, defaultSpecials: defaultSpecials, aiDecide: aiDecide, pickAiNames: pickAiNames, renameAi: renameAi, AI_NAMES: AI_NAMES, gameRanking: gameRanking, winPercent: winPercent, formatPercent: formatPercent, nextCareer: nextCareer, sortBoard: sortBoard };
   api.eventsSince = function (S, id) { return (S.events || []).filter(function (e) { return e.id > id; }); };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.EnTil = api;
 })(this);
