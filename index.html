@@ -138,6 +138,20 @@ body.ingame .disc{margin:6px 4px 0;padding-bottom:2px}
 .pick button .sc2 b{font-size:24px;font-weight:900}
 .pick button .sc2 small{font-size:13px;font-weight:700;color:#c5d2ea;margin-top:4px;white-space:nowrap}
 .pick button .sc2 small em{font-style:normal;color:#fff}
+.pick button .lft{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;flex:1}
+.pick button .lft .who{max-width:100%}
+.pick button .hand{display:flex;flex-wrap:wrap;gap:3px}
+.pick button .hand .c{width:22px;height:30px;font-size:13px;border-radius:5px;box-shadow:none}
+.pick button .hand .c.mod{font-size:9px}
+.pick button .hand .c.fr,.pick button .hand .c.f3,.pick button .hand .c.sc,.pick button .hand .c.et,.pick button .hand .c.gv,.pick button .hand .c.pa{font-size:11px}
+.pick button .hand .c i{display:none}
+.pick button .hand.many .c{width:18px;height:25px;font-size:11px;border-radius:4px}
+.pick button .hand.many .c.mod{font-size:8px}
+.pick button .hand .none{font-size:12px;font-weight:600;color:#9fb0d0}
+.pick.gvr button{padding:10px 14px}
+.pick.gvr.tight button{padding:7px 12px;margin-bottom:6px;font-size:17px}
+.pick.gvr.tight button .lft{gap:4px}
+.pick.gvr.tight button .sc2 b{font-size:20px}
 .c.mini{width:34px;height:46px;font-size:20px;border-radius:7px;vertical-align:middle;box-shadow:none;margin:0 2px}
 .c.mini i{display:none}
 .gvc{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px}
@@ -1024,9 +1038,14 @@ function renderLobby() {
   keepInput(() => { $('app').innerHTML = h; });
 }
 
-function pickRow(v, i, meIdx) {
+function pickRow(v, i, meIdx, withHand) {
   const p = v.players[i];
   const nm = p.ai ? String(p.name).replace(/ \(AI\)$/, '') : p.name;
+  if (withHand) {
+    const n = p.nums.length + p.mods.length + p.acts.length + (p.bustCard != null ? 1 : 0);
+    const hand = n ? handHtml(p, false) : '<span class="none">Ingen kort</span>';
+    return `<span class="lft"><span class="who"><span>${esc(nm)}</span>${p.ai ? '<span class="ain">(AI)</span>' : ''}${i === meIdx ? '<span class="ds">(dig selv)</span>' : ''}</span><span class="hand${n > 9 ? ' many' : ''}">${hand}</span></span><span class="sc2"><b>${G.roundScore(p)} p</b><small>I alt <em>${p.total}</em></small></span>`;
+  }
   return `<span class="who"><span>${esc(nm)}</span>${p.ai ? '<span class="ain">(AI)</span>' : ''}${i === meIdx ? '<span class="ds">(dig selv)</span>' : ''}</span><span class="sc2"><b>${G.roundScore(p)} p</b><small>I alt <em>${p.total}</em></small></span>`;
 }
 function renderGame() {
@@ -1073,7 +1092,7 @@ function renderGame() {
     if (gvNum == null || P.numbers.indexOf(gvNum) < 0) {
       sh.innerHTML = `<h2>Giv væk</h2><p class="hint">Vælg et af dine talkort. Har modtageren tallet i forvejen, går de bust.</p><div class="gvc" id="pick">${P.numbers.map(n => `<button type="button" data-n="${n}" onclick="gvNum=${n};render()">${cardHtml('n' + n)}</button>`).join('')}</div>`;
     } else {
-      sh.innerHTML = `<h2>Giv ${cardHtml('n' + gvNum, 'mini')} til…</h2><p class="hint"><button class="ghost" type="button" onclick="gvNum=null;render()">← Vælg et andet tal</button></p><div class="pick" id="pick">${P.options.map(i => `<button data-t="${i}" ${sending ? 'disabled' : ''} onclick="hostAct({a:'choose',target:${i},num:${gvNum}})">${pickRow(v, i, meIdx)}</button>`).join('')}</div>`;
+      sh.innerHTML = `<h2>Giv ${cardHtml('n' + gvNum, 'mini')} til…</h2><p class="hint"><button class="ghost" type="button" onclick="gvNum=null;render()">← Vælg et andet tal</button></p><div class="pick gvr${P.options.length > 4 ? ' tight' : ''}" id="pick">${P.options.map(i => `<button data-t="${i}" ${sending ? 'disabled' : ''} onclick="hostAct({a:'choose',target:${i},num:${gvNum}})">${pickRow(v, i, meIdx, true)}</button>`).join('')}</div>`;
     }
     m.classList.add('show');
   } else if (v.phase === 'play' && v.pending && v.pending.chooser === meIdx) {
