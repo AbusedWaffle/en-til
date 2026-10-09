@@ -32,9 +32,9 @@
     var sp = specials || defaultSpecials();
     n = chanceCopies(3, chance);
     for (k = 0; k < SPEC_KEYS.length; k++) if (sp[SPEC_KEYS[k]]) for (i = 0; i < n; i++) d.push(SPEC_KEYS[k]);
-    // Minuskort følger samme chance-mønster som specialkort: 3 af hver værdi (Lille 2, Høj 6)
+    // Minuskort: Standard = 2 af hver værdi (6 i alt, som +kortene), Lille 1 af hver, Høj 4 af hver
     if (MINUS_SETS[minus]) {
-      n = chanceCopies(3, minusChance);
+      n = chanceCopies(2, minusChance);
       for (k = 0; k < 3; k++) for (i = 0; i < n; i++) d.push('d' + MINUS_SETS[minus][k]);
     }
     return d;
