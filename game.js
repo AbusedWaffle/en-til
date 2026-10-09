@@ -3,11 +3,15 @@
   'use strict';
   var MAX_LOG = 40, MAX_EV = 60;
 
-  var SPEC_KEYS = ['fr', 'f3', 'sc', 'et', 'gv', 'pa'];
-  function defaultSpecials() { return { fr: true, f3: true, sc: true, et: false, gv: false, pa: false }; }
+  var SPEC_KEYS = ['fr', 'f3', 'sc', 'et', 'gv', 'pa', 'h2', 'gh'];
+  function defaultSpecials() { return { fr: true, f3: true, sc: true, et: false, gv: false, pa: false, h2: false, gh: false }; }
+  // Minuskort (valgfrit): sæt af tre værdier. Kortkode 'd<v>' (fx 'd4' = −4).
+  var MINUS_SETS = { a: [2, 4, 6], b: [4, 6, 8], c: [8, 10, 12] };
   function normalizeRules(S) {
     if ([8, 12, 16].indexOf(S.deckMax) < 0) S.deckMax = 12;
     if (S.chance !== 'low' && S.chance !== 'high') S.chance = 'std';
+    if (!MINUS_SETS[S.minus]) S.minus = 'off';
+    if (S.minusChance !== 'low' && S.minusChance !== 'high') S.minusChance = 'std';
     if (!S.specials) S.specials = defaultSpecials();
     SPEC_KEYS.forEach(function (k) { if (typeof S.specials[k] !== 'boolean') S.specials[k] = !!defaultSpecials()[k]; });
   }
@@ -18,7 +22,7 @@
     if (chance === 'high') return base * 2;
     return base;
   }
-  function buildDeck(max, specials, chance) {
+  function buildDeck(max, specials, chance, minus, minusChance) {
     max = max || 12;
     if (chance !== 'low' && chance !== 'high') chance = 'std';
     var d = ['n0'], v, i, k, n;
@@ -28,6 +32,11 @@
     var sp = specials || defaultSpecials();
     n = chanceCopies(3, chance);
     for (k = 0; k < SPEC_KEYS.length; k++) if (sp[SPEC_KEYS[k]]) for (i = 0; i < n; i++) d.push(SPEC_KEYS[k]);
+    // Minuskort følger samme chance-mønster som specialkort: 3 af hver værdi (Lille 2, Høj 6)
+    if (MINUS_SETS[minus]) {
+      n = chanceCopies(3, minusChance);
+      for (k = 0; k < 3; k++) for (i = 0; i < n; i++) d.push('d' + MINUS_SETS[minus][k]);
+    }
     return d;
   }
   function shuffle(a, rng) {
@@ -36,11 +45,14 @@
     return a;
   }
   function isNum(c) { return c[0] === 'n'; }
+  function isMinus(c) { return c[0] === 'd'; }
+  function isMod(c) { return c[0] === 'm' || c === 'x2' || c[0] === 'd'; }
   function numVal(c) { return parseInt(c.slice(1), 10); }
   function label(c) {
     if (isNum(c)) return c.slice(1);
     if (c[0] === 'm') return '+' + c.slice(1);
-    return { x2: '×2', fr: 'Frys', f3: 'Træk 3', sc: '2. chance', et: 'Ekstra træk', gv: 'Giv væk', pa: 'Pause' }[c] || c;
+    if (c[0] === 'd') return '−' + c.slice(1);
+    return { x2: '×2', fr: 'Frys', f3: 'Træk 3', sc: '2. chance', et: 'Ekstra træk', gv: 'Giv væk', pa: 'Pause', h2: '÷2', gh: 'Giv ÷2' }[c] || c;
   }
   function roundScore(p) {
     if (p.status === 'bust') return 0;
@@ -49,9 +61,14 @@
     if (p.mods.indexOf('x2') >= 0) s *= 2;
     for (i = 0; i < p.mods.length; i++) if (p.mods[i][0] === 'm') s += parseInt(p.mods[i].slice(1), 10);
     if (p.seven) s += 15;
-    return s;
+    // Minuskort efter de andre modifikatorer. Må gerne gå under 0 (trækker fra totalen). Bust er stadig 0.
+    for (i = 0; i < p.mods.length; i++) if (p.mods[i][0] === 'd') s -= parseInt(p.mods[i].slice(1), 10);
+    // Derefter ÷2 pr. halveringskort, afrundet mod 0 (7 → 3, −5 → −2)
+    var acts = p.acts || [];
+    for (i = 0; i < acts.length; i++) if (acts[i] === 'h2' || acts[i] === 'gh') s = Math.trunc(s / 2);
+    return s === 0 ? 0 : s;
   }
-  function roundScoreRaw(p) { return roundScore({ status: 'active', nums: p.nums, mods: p.mods, seven: false }); }
+  function roundScoreRaw(p) { return roundScore({ status: 'active', nums: p.nums, mods: p.mods, acts: p.acts, seven: false }); }
   function tableCards(p) {
     var c = p.nums.map(function (v) { return 'n' + v; }).concat(p.mods, p.acts);
     if (p.bustCard !== null && p.bustCard !== undefined) c.push('n' + p.bustCard);
@@ -78,7 +95,7 @@
   function activeIdx(S) { var r = []; for (var i = 0; i < S.players.length; i++) if (isActive(S, i)) r.push(i); return r; }
 
   function createLobby(target) {
-    return { v: 1, phase: 'lobby', target: target || 200, deckMax: 12, chance: 'std', specials: defaultSpecials(), players: [], log: [], seq: 0, events: [], evSeq: 0 };
+    return { v: 1, phase: 'lobby', target: target || 200, deckMax: 12, chance: 'std', specials: defaultSpecials(), minus: 'off', minusChance: 'std', players: [], log: [], seq: 0, events: [], evSeq: 0 };
   }
   function addPlayer(S, id, name) {
     var p = { id: id, name: name, online: true, total: 0 };
@@ -91,7 +108,7 @@
     if (S.players.length < 2) return { ok: false, err: 'Mindst 2 spillere' };
     S.phase = 'play'; S.round = 0; S.dealer = -1; S.history = []; S.winners = []; S.tie = false;
     normalizeRules(S);
-    S.deck = shuffle(buildDeck(S.deckMax, S.specials, S.chance), rng); S.discard = [];
+    S.deck = shuffle(buildDeck(S.deckMax, S.specials, S.chance, S.minus, S.minusChance), rng); S.discard = [];
     S.players.forEach(function (p) { p.total = 0; resetPlayerRound(p); });
     S.matchId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
     log(S, 'Spillet starter! Mål: ' + S.target + ' point', 'info');
@@ -143,10 +160,16 @@
       }
       return;
     }
-    var action = card === 'fr' || card === 'f3' || card === 'sc' || card === 'et' || card === 'gv' || card === 'pa';
+    var action = SPEC_KEYS.indexOf(card) >= 0;
     log(S, nm(S, i) + ' ' + verb + ' ' + label(card), action ? 'action' : '');
     ev(S, 'card', { p: i, card: card, f3: f3, deal: deal });
-    if (card[0] === 'm' || card === 'x2') { p.mods.push(card); return; }
+    if (isMod(card)) { p.mods.push(card); return; }
+    if (card === 'h2') {
+      p.acts.push('h2');
+      log(S, nm(S, i) + ' får ÷2 – rundens point halveres', 'action');
+      ev(S, 'half', { p: i, t: i, card: 'h2' });
+      return;
+    }
     if (card === 'sc') {
       if (!p.sc) { p.sc = true; p.acts.push('sc'); ev(S, 'sc', { p: i, t: i }); }
       else S.queue.unshift({ t: 'assign', card: 'sc', from: i });
@@ -183,6 +206,8 @@
   function candidates(S, card, from) {
     if (card === 'sc') return activeIdx(S).filter(function (i) { return i !== from && !S.players[i].sc; });
     if (card === 'gv') { var r = []; for (var i = 0; i < S.players.length; i++) if (i !== from && S.players[i].status !== 'bust') r.push(i); return r; }
+    // Giv ÷2: en anden aktiv spiller. Er der ingen, beholder trækkeren den selv.
+    if (card === 'gh') { var o = activeIdx(S).filter(function (k) { return k !== from; }); return o.length ? o : [from]; }
     return activeIdx(S);
   }
   function resolveGive(S, from, target, v) {
@@ -221,6 +246,10 @@
       log(S, self ? nm(S, from) + ' tager selv Træk 3' : nm(S, from) + ' giver Træk 3 til ' + tp.name, 'action');
       ev(S, 'take3', { p: from, t: target });
       S.queue.unshift({ t: 'take3', target: target, left: 3, aside: [] });
+    } else if (card === 'gh') {
+      tp.acts.push('gh');
+      log(S, self ? nm(S, from) + ' må selv beholde Giv ÷2 (ingen andre aktive)' : nm(S, from) + ' giver ÷2 til ' + tp.name, 'action');
+      ev(S, 'half', { p: from, t: target, card: 'gh' });
     } else if (card === 'sc') {
       tp.sc = true; tp.acts.push('sc');
       log(S, nm(S, from) + ' giver 2. chance til ' + tp.name, 'action');
@@ -466,7 +495,7 @@
   var api = { buildDeck: buildDeck, shuffle: shuffle, label: label, roundScore: roundScore, tableCards: tableCards, createLobby: createLobby,
     addPlayer: addPlayer, startGame: startGame, startRound: startRound, nextRound: nextRound, act: act, process: process, endRound: endRound,
     canStop: canStop, activeIdx: activeIdx, backToLobby: backToLobby, countCards: countCards, publicView: publicView, drawCard: drawCard,
-    normalizeRules: normalizeRules, defaultSpecials: defaultSpecials, aiDecide: aiDecide, pickAiNames: pickAiNames, renameAi: renameAi, AI_NAMES: AI_NAMES, gameRanking: gameRanking, winPercent: winPercent, formatPercent: formatPercent, nextCareer: nextCareer, sortBoard: sortBoard };
+    normalizeRules: normalizeRules, defaultSpecials: defaultSpecials, MINUS_SETS: MINUS_SETS, SPEC_KEYS: SPEC_KEYS, aiDecide: aiDecide, pickAiNames: pickAiNames, renameAi: renameAi, AI_NAMES: AI_NAMES, gameRanking: gameRanking, winPercent: winPercent, formatPercent: formatPercent, nextCareer: nextCareer, sortBoard: sortBoard };
   api.eventsSince = function (S, id) { return (S.events || []).filter(function (e) { return e.id > id; }); };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.EnTil = api;
 })(this);

@@ -51,6 +51,11 @@ button:disabled{opacity:.35}
 .pr{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto auto;column-gap:4px;row-gap:1px;padding:7px 8px 8px;border-radius:12px;background:#1b2a4a;margin:0;border:0;min-width:0;align-content:start}
 .pr.turn{background:#1aaa46}
 .pr.is-bust{background:#5c1826}
+.pr.is-stopped{background:#3b4150}
+.pr.is-stopped .nm,.pr.is-stopped .pts{color:#e4e8ef}
+.pr.is-stopped .pts small{color:#c3c9d4}
+.pr.is-stopped .sm{filter:grayscale(.85);opacity:.75}
+.pr.is-stopped .ain{color:#d8cfa6}
 .pr.is-bust .sm{opacity:.6;filter:grayscale(.45)}
 .bustx{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;font-size:54px;font-weight:900;color:#ff2d4d;text-shadow:0 3px 0 #2a0610,0 0 14px #ff2d4daa;pointer-events:none;line-height:1}
 .bustpop{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#fff;background:#e0485fe6;border-radius:12px;animation:slam .4s both;pointer-events:none}
@@ -70,10 +75,10 @@ button:disabled{opacity:.35}
 .pr .sm{grid-column:1 / -1;margin-top:4px}
 .grid .sm .c{width:42px;height:56px;font-size:24px;border-radius:7px}
 .grid .sm .c.mod{font-size:16px}
-.grid .sm .c.fr,.grid .sm .c.f3,.grid .sm .c.sc,.grid .sm .c.et,.grid .sm .c.gv,.grid .sm .c.pa{font-size:16px}
+.grid .sm .c.fr,.grid .sm .c.f3,.grid .sm .c.sc,.grid .sm .c.et,.grid .sm .c.gv,.grid .sm .c.pa,.grid .sm .c.h2,.grid .sm .c.gh{font-size:16px}
 .grid.mid .sm .c{width:34px;height:46px;font-size:18px}
 .grid.mid .sm .c.mod{font-size:13px}
-.grid.mid .sm .c.fr,.grid.mid .sm .c.f3,.grid.mid .sm .c.sc,.grid.mid .sm .c.et,.grid.mid .sm .c.gv,.grid.mid .sm .c.pa{font-size:13px}
+.grid.mid .sm .c.fr,.grid.mid .sm .c.f3,.grid.mid .sm .c.sc,.grid.mid .sm .c.et,.grid.mid .sm .c.gv,.grid.mid .sm .c.pa,.grid.mid .sm .c.h2,.grid.mid .sm .c.gh{font-size:13px}
 .grid.crowded .sm .c{width:23px;height:31px;font-size:14px}
 .grid.crowded .sm .c.mod{font-size:11px}
 .grid.crowded .pr .pts{font-size:22px}
@@ -88,7 +93,7 @@ body.ingame .disc{display:none}
 .grid.fit .status,.grid.fit .giver,.grid.fit .dig{font-size:calc(var(--fs,15px)*.68)}
 .grid.fit .sm{gap:var(--cg,3px);align-content:flex-start}
 .grid.fit .sm .c{width:var(--cw,30px);height:calc(var(--cw,30px)*1.34);font-size:calc(var(--cw,30px)*.56);border-radius:calc(var(--cw,30px)*.16)}
-.grid.fit .sm .c.mod,.grid.fit .sm .c.fr,.grid.fit .sm .c.f3,.grid.fit .sm .c.sc,.grid.fit .sm .c.et,.grid.fit .sm .c.gv,.grid.fit .sm .c.pa{font-size:calc(var(--cw,30px)*.4)}
+.grid.fit .sm .c.mod,.grid.fit .sm .c.fr,.grid.fit .sm .c.f3,.grid.fit .sm .c.sc,.grid.fit .sm .c.et,.grid.fit .sm .c.gv,.grid.fit .sm .c.pa,.grid.fit .sm .c.h2,.grid.fit .sm .c.gh{font-size:calc(var(--cw,30px)*.4)}
 .grid.fit .bustx{font-size:calc(var(--fs,15px)*3.6)}
 body.ingame header{padding:6px 10px}
 body.ingame h1{font-size:18px}
@@ -105,11 +110,13 @@ body.ingame .disc{margin:6px 4px 0;padding-bottom:2px}
 .c.et{background:#3ddc84;color:#0b2a1a;font-size:24px}
 .c.gv{background:#b28dff;color:#1b1030;font-size:22px}
 .c.pa{background:#d7e4f5;color:#1a3350;font-size:22px}
+.c.h2{background:#2ec4b6;color:#062b27;font-size:22px}
+.c.gh{background:#ff6fae;color:#3a0820;font-size:22px}
 .c.dup{outline:3px solid #e0485f;background:#ffd6dc;color:#b0102a}
 .c.pop{animation:pop .45s ease-out}
 @keyframes pop{0%{transform:scale(.3) rotate(-12deg);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1)}}
 .sm .c{width:24px;height:33px;font-size:14px;border-radius:5px;box-shadow:none}
-.sm .c.mod{font-size:11px}.sm .c.fr,.sm .c.f3,.sm .c.sc,.sm .c.et,.sm .c.gv,.sm .c.pa{font-size:12px}
+.sm .c.mod{font-size:11px}.sm .c.fr,.sm .c.f3,.sm .c.sc,.sm .c.et,.sm .c.gv,.sm .c.pa,.sm .c.h2,.sm .c.gh{font-size:12px}
 .sm .c i{display:none}
 .sm{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
 .n0{color:#555}.n1{color:#8a6d3b}.n2{color:#2e8b57}.n3{color:#c0392b}.n4{color:#2471a3}.n5{color:#16a085}.n6{color:#8e44ad}.n7{color:#d35400}.n8{color:#27ae60}.n9{color:#b7950b}.n10{color:#c2185b}.n11{color:#1a5276}.n12{color:#6c3483}
@@ -143,7 +150,7 @@ body.ingame .disc{margin:6px 4px 0;padding-bottom:2px}
 .pick button .hand{display:flex;flex-wrap:wrap;gap:3px}
 .pick button .hand .c{width:22px;height:30px;font-size:13px;border-radius:5px;box-shadow:none}
 .pick button .hand .c.mod{font-size:9px}
-.pick button .hand .c.fr,.pick button .hand .c.f3,.pick button .hand .c.sc,.pick button .hand .c.et,.pick button .hand .c.gv,.pick button .hand .c.pa{font-size:11px}
+.pick button .hand .c.fr,.pick button .hand .c.f3,.pick button .hand .c.sc,.pick button .hand .c.et,.pick button .hand .c.gv,.pick button .hand .c.pa,.pick button .hand .c.h2,.pick button .hand .c.gh{font-size:11px}
 .pick button .hand .c i{display:none}
 .pick button .hand.many .c{width:18px;height:25px;font-size:11px;border-radius:4px}
 .pick button .hand.many .c.mod{font-size:8px}
@@ -259,12 +266,16 @@ td.n{text-align:right;font-weight:800}
 /* 2. chance / reddet */
 #fx.sc,#fx.save{background:radial-gradient(circle at 50% 45%,#8a1f3af6,#10192efc 70%);color:#fff}
 #fx.pause{background:#152848;color:#fff}
+#fx.half{background:radial-gradient(circle at 50% 45%,#7a1f55f6,#10192efc 72%);color:#fff}
+#fx.half .ttl{color:#fff;text-shadow:0 4px 0 #5a0a35,0 0 26px #ff6fae}
 #fx.extra,#fx.give{background:radial-gradient(circle at 50% 45%,#1d3a66f6,#10192efc 72%);color:#fff}
 #fx.pause .ttl,#fx.extra .ttl,#fx.give .ttl{color:#fff;text-shadow:0 4px 0 #0c2244}
 .specs{display:flex;flex-wrap:wrap;gap:6px}
 .specs button{padding:8px 10px;font-size:14px;background:#0d1628;color:#cfd9ee}
 .specs button.on{background:#ffcf40;color:#10192e}
 .seg.deck button{flex:1;padding:12px 4px}
+.seg.minus button{font-size:13px;padding:11px 2px;white-space:nowrap}
+.seg.minus button[data-minus="off"]{flex:.6}
 .seg.ai{flex-wrap:wrap}
 .seg.ai button{flex:1 0 36px;padding:10px 0}
 #fx.sc .ttl,#fx.save .ttl{color:#fff;text-shadow:0 4px 0 #7a0f22,0 0 26px #ff6b86}
@@ -369,9 +380,10 @@ function linkFor(room) {
   return location.origin + location.pathname + '?' + p.toString();
 }
 const STATUS = { active: 'Aktiv', stopped: 'Stoppet', bust: 'Bust', frozen: 'Frosset' };
-const CARD_NAME = { fr: 'Frys', f3: 'Træk 3', sc: '2. chance', et: 'Ekstra træk', gv: 'Giv væk', pa: 'Pause' };
-const CARD_DESC = { fr: 'Spilleren banker sine point og er ude af runden.', f3: 'Spilleren skal vende de næste 3 kort ét ad gangen.', sc: 'Du har allerede en 2. chance – giv denne til en anden aktiv spiller.', et: 'Du trækker to kort mere med det samme. Bust på det første stopper det andet.', gv: 'Giv et af dine talkort til en anden spiller. Har de tallet i forvejen, går de bust.', pa: 'Du springes over én gang. Du bliver i runden og kan trække igen bagefter.' };
-const SPEC_LIST = [['fr','Frys'],['f3','Træk 3'],['sc','2. chance'],['et','Ekstra træk'],['gv','Giv væk'],['pa','Pause']];
+const CARD_NAME = { fr: 'Frys', f3: 'Træk 3', sc: '2. chance', et: 'Ekstra træk', gv: 'Giv væk', pa: 'Pause', h2: '÷2', gh: 'Giv ÷2' };
+const CARD_DESC = { fr: 'Spilleren banker sine point og er ude af runden.', f3: 'Spilleren skal vende de næste 3 kort ét ad gangen.', sc: 'Du har allerede en 2. chance – giv denne til en anden aktiv spiller.', et: 'Du trækker to kort mere med det samme. Bust på det første stopper det andet.', gv: 'Giv et af dine talkort til en anden spiller. Har de tallet i forvejen, går de bust.', pa: 'Du springes over én gang. Du bliver i runden og kan trække igen bagefter.', h2: 'Dine point i runden halveres.', gh: 'Giv den til en anden aktiv spiller. Deres point i runden halveres.' };
+const SPEC_LIST = [['fr','Frys'],['f3','Træk 3'],['sc','2. chance'],['et','Ekstra træk'],['gv','Giv væk'],['pa','Pause'],['h2','÷2'],['gh','Giv ÷2']];
+const MINUS_LIST = [['off','Fra'],['a','−2 −4 −6'],['b','−4 −6 −8'],['c','−8 −10 −12']];
 
 // ---------- tilstand ----------
 let role = null, room = null, peer = null, S = null, view = null, conns = {}, hostConn = null;
@@ -578,6 +590,8 @@ function hostNewGame() { G.backToLobby(S); G.renameAi(S); publish(); }
 function hostKick(pid) { const i = S.players.findIndex(p => p.id === pid); if (i <= 0 || S.phase !== 'lobby') return; const c = conns[pid]; if (c) { send(c, { t: 'reject', reason: 'Værten fjernede dig fra spillet.' }); delete conns[pid]; setTimeout(() => c.close(), 500); } S.players.splice(i, 1); publish(); }
 function hostTarget(v) { const t = parseInt(v, 10); if (t > 0 && S.phase === 'lobby') { S.target = t; publish(); } }
 function hostDeck(n) { n = +n; if (role !== 'host' || !S || S.phase !== 'lobby' || [8,12,16].indexOf(n) < 0) return; S.deckMax = n; publish(); }
+function hostMinus(k) { if (role !== 'host' || !S || S.phase !== 'lobby' || ['off','a','b','c'].indexOf(k) < 0) return; S.minus = k; publish(); }
+function hostMinusChance(c) { if (role !== 'host' || !S || S.phase !== 'lobby' || ['low','std','high'].indexOf(c) < 0) return; S.minusChance = c; publish(); }
 function hostChance(c) { if (role !== 'host' || !S || S.phase !== 'lobby' || ['low','std','high'].indexOf(c) < 0) return; S.chance = c; publish(); }
 const CHANCE_NAME = { low: 'Lille', std: 'Standard', high: 'Høj' };
 function hostSpec(k) { if (role !== 'host' || !S || S.phase !== 'lobby' || !S.specials || !(k in S.specials)) return; S.specials[k] = !S.specials[k]; publish(); }
@@ -651,7 +665,7 @@ function leave() {
 }
 
 // ---------- animationer (hændelser fra værten: view.events med stigende id) ----------
-const FX_BIG = { bust: 1, freeze: 1, take3: 1, save: 1, sc: 1, seven: 1, win: 1, pause: 1, extra: 1, give: 1 };
+const FX_BIG = { bust: 1, freeze: 1, take3: 1, save: 1, sc: 1, seven: 1, win: 1, pause: 1, extra: 1, give: 1, half: 1 };
 let fxBig = false, fxQ = [], fxCur = null, fxTimer = null, fxOutT = null;
 // Nye hændelser siden sidst. Første visning (join, genindlæsning, genforbindelse) springer gamle hændelser over.
 function takeEvents(v) {
@@ -680,9 +694,10 @@ const SFX = {
   win: () => [523, 659, 784, 1047, 784, 1047].forEach((f, k) => tone(f, k * 0.12, 0.35, 'triangle', 0.07)),
   pause: () => tone(440, 0, 0.25, 'sine', 0.06, 330),
   extra: () => tone(700, 0, 0.18, 'triangle', 0.07, 980),
-  give: () => tone(520, 0, 0.2, 'triangle', 0.07, 680)
+  give: () => tone(520, 0, 0.2, 'triangle', 0.07, 680),
+  half: () => { tone(880, 0, 0.18, 'triangle', 0.07, 660); tone(660, 0.18, 0.28, 'triangle', 0.07, 330); }
 };
-const VIB_ME = { bust: [60, 40, 60, 40, 260], freeze: [30, 60, 30, 60, 30], take3: [40, 400, 40, 400, 40], save: [40, 60, 120], sc: [40, 60, 40], seven: [100, 50, 100, 50, 300], win: [100, 50, 100, 50, 300], pause: [40, 80, 40], extra: [30, 40, 30], give: [40, 60, 40] };
+const VIB_ME = { bust: [60, 40, 60, 40, 260], freeze: [30, 60, 30, 60, 30], take3: [40, 400, 40, 400, 40], save: [40, 60, 120], sc: [40, 60, 40], seven: [100, 50, 100, 50, 300], win: [100, 50, 100, 50, 300], pause: [40, 80, 40], extra: [30, 40, 30], give: [40, 60, 40], half: [60, 60, 60] };
 function fxEsc(v, i, subj) { const meIdx = v.players.findIndex(p => p.id === myId); return i === meIdx ? (subj ? 'Du' : 'dig') : esc((v.players[i] || {}).name || '?'); }
 function flakes(n) { let h = ''; for (let k = 0; k < n; k++) h += `<span class="flake" style="--x:${Math.random() * 100}%;--s:${14 + Math.random() * 22}px;--d:${1.3 + Math.random() * 1.2}s;--dl:${Math.random() * 0.6}s;--sx:${(Math.random() - 0.5) * 80}px">❄</span>`; return h; }
 function confetti(n) { const C = ['#ffcf40', '#e0485f', '#7fd8ff', '#3ddc84', '#ffffff', '#ff8a3d', '#b28dff']; let h = ''; for (let k = 0; k < n; k++) { const bx = (Math.random() - 0.5) * 380; h += `<span class="conf" style="--c:${C[k % C.length]};--d:${2.2 + Math.random() * 1.2}s;--dl:${Math.random() * 0.25}s;--bx:${bx}px;--by:${-120 - Math.random() * 260}px;--sx:${bx * 1.5}px;--r:${(Math.random() - 0.5) * 1440}deg"></span>`; } return h; }
@@ -695,7 +710,7 @@ function fxHtml(o, v) {
     case 'bust': return {
       dur: 1800, html: `<div class="vis"><div class="split"><span class="c big h1 n${numOf(e.card)}">${numOf(e.card)}</span><span class="c big h2 n${numOf(e.card)}">${numOf(e.card)}</span></div></div>
       <div class="ttl"><span class="crk" data-t="BUST!">BUST!</span></div><div class="sub">${Su(e.p)} røg ud!</div>
-      <div class="sm2">Trak ${numOf(e.card)} igen${e.f3 ? ' under Træk 3' : ''}${e.lost ? ` · ${e.lost} point tabt` : ''}</div>` };
+      <div class="sm2">Trak ${numOf(e.card)} igen${e.f3 ? ' under Træk 3' : ''}${e.lost > 0 ? ` · ${e.lost} point tabt` : ''}</div>` };
     case 'freeze': return {
       dur: 1700, html: `${flakes(reducedFx() ? 0 : 22)}<div class="vis"><div class="ice">❄</div></div><div class="ttl">Frosset!</div>${who(e.p, e.t)}
       <div class="sub">${e.p === e.t ? `${Su(e.p)} frøs ${e.p === v.players.findIndex(p => p.id === myId) ? 'dig' : 'sig'} selv` : `${Su(e.p)} frøs ${P(e.t)}`}</div>
@@ -724,6 +739,9 @@ function fxHtml(o, v) {
     case 'extra': return {
       dur: 1200, html: `<div class="vis"><span class="c big et">+<i>EKSTRA</i></span></div><div class="ttl" style="font-size:clamp(36px,11vw,60px)">Ekstra træk!</div>
       <div class="sub">${Su(e.p)} trækker to kort mere</div><div class="sm2">Bust på det første stopper det andet</div>` };
+    case 'half': return {
+      dur: 1500, html: `<div class="vis"><span class="c big ${e.card === 'gh' ? 'gh' : 'h2'}">÷2<i>${e.card === 'gh' ? 'GIV ÷2' : 'HALVER'}</i></span></div><div class="ttl" style="font-size:clamp(48px,15vw,76px)">÷2!</div>${who(e.p, e.t)}
+      <div class="sub">${e.p === e.t ? `${Su(e.t)} får ÷2` : `${Su(e.p)} gav ${P(e.t)} ÷2`}</div><div class="sm2">Rundens point halveres</div>` };
     case 'give': return {
       dur: 1600, html: `<div class="vis">${e.card ? cardHtml(e.card, 'big' + (e.bust ? ' dup' : '')) : '<span class="c big gv">➜<i>GIV</i></span>'}</div><div class="ttl" style="font-size:clamp(36px,12vw,64px)">Giv væk!</div>${e.t === undefined ? '' : who(e.p, e.t)}
       <div class="sub">${e.none ? `${Su(e.p)} har ingen talkort` : e.bust ? `${P(e.t)} gik bust` : `${Su(e.p)} gav ${numOf(e.card)} væk`}</div>` };
@@ -784,13 +802,14 @@ function cueText(e, v, after) {
   else if (e.type === 'win') t = `🏆 ${Su(e.p)} vinder med ${e.pts} point!`;
   else if (e.type === 'pause') t = `Ⅱ Pause! ${Su(e.p)} springes over én gang`;
   else if (e.type === 'extra') t = `＋ Ekstra træk! ${Su(e.p)} trækker to kort mere`;
+  else if (e.type === 'half') t = e.p === e.t ? `÷2! ${Su(e.t)} får ÷2 – point i runden halveres` : `÷2! ${Su(e.p)} gav ${P(e.t)} ÷2`;
   else if (e.type === 'give') t = e.none ? `➜ Giv væk uden talkort (${Su(e.p)})` : `➜ ${Su(e.p)} gav ${numOf(e.card)} til ${P(e.t)}${e.bust ? ' – bust' : ''}`;
   return un(t);
 }
-const CUE_KIND = { bust: 'bust', freeze: 'action', take3: 'action', sc: 'action', save: 'action', seven: 'seven', win: 'seven', pause: 'action', extra: 'action', give: 'action' };
+const CUE_KIND = { bust: 'bust', freeze: 'action', take3: 'action', sc: 'action', save: 'action', seven: 'seven', win: 'seven', pause: 'action', extra: 'action', give: 'action', half: 'action' };
 // Fuldskærm kun for den, kortet rammer. Alle andre ser brikken (og et flyvende kort, hvis det gives videre).
 function seesOverlay(e, meIdx) {
-  if (e.type === 'freeze' || e.type === 'take3' || e.type === 'sc') return e.t === meIdx;
+  if (e.type === 'freeze' || e.type === 'take3' || e.type === 'sc' || e.type === 'half') return e.t === meIdx;
   if (e.type === 'give') return e.none ? e.p === meIdx : e.t === meIdx;
   if (e.type === 'pause' || e.type === 'extra' || e.type === 'bust' || e.type === 'save' || e.type === 'seven') return e.p === meIdx;
   if (e.type === 'win') return true;
@@ -802,6 +821,7 @@ function specLine(e, v) {
   if (e.type === 'take3') return e.p === e.t ? nm(e.p) + ' tager selv Træk 3' : nm(e.p) + ' sender Træk 3 til ' + nm(e.t);
   if (e.type === 'give') return e.none ? nm(e.p) + ' trak Giv væk' : nm(e.p) + ' sender ' + numOf(e.card) + ' til ' + nm(e.t);
   if (e.type === 'sc') return e.p === e.t ? nm(e.t) + ' fik en 2. chance' : nm(e.p) + ' sender 2. chance til ' + nm(e.t);
+  if (e.type === 'half') return e.p === e.t ? nm(e.t) + ' får ÷2' : nm(e.p) + ' sender ÷2 til ' + nm(e.t);
   if (e.type === 'pause') return nm(e.p) + ' springes over én gang';
   if (e.type === 'extra') return nm(e.p) + ' trækker to kort mere';
   if (e.type === 'save') return nm(e.p) + ' reddet af 2. chance (' + numOf(e.card) + ' igen)';
@@ -843,15 +863,15 @@ function tileBust(row, mode) {
   row.appendChild(el);
   setTimeout(() => { if (el.parentNode) el.remove(); }, mode === 'full' ? 900 : 1500);
 }
-const TILE_TXT = { sc: '♥ 2. chance', save: '♥ Reddet!', seven: 'SYV! +15', pause: 'Ⅱ Pause', extra: '+ Ekstra træk' };
+const TILE_TXT = { sc: '♥ 2. chance', save: '♥ Reddet!', seven: 'SYV! +15', pause: 'Ⅱ Pause', extra: '+ Ekstra træk', half: '÷2' };
 function spectate(e, v) {
   const line = specLine(e, v);
   const tgt = e.t !== undefined ? e.t : e.p;
   if (TILE_TXT[e.type] && SET.anim !== 'none') fxFloat(fxRow(tgt), TILE_TXT[e.type], e.type === 'seven' ? '' : 'sc');
-  const passed = (e.type === 'freeze' || e.type === 'take3' || e.type === 'give' || e.type === 'sc') && e.t !== undefined && e.p !== e.t && !e.none;
+  const passed = (e.type === 'freeze' || e.type === 'take3' || e.type === 'give' || e.type === 'sc' || e.type === 'half') && e.t !== undefined && e.p !== e.t && !e.none;
   if (SET.anim !== 'full' || !passed) { if (line && SET.anim === 'reduced') toast(line, 'action', 2000); return; }
   if (!passed) return;
-  const card = e.type === 'freeze' ? 'fr' : e.type === 'take3' ? 'f3' : e.type === 'sc' ? 'sc' : (e.card || 'gv');
+  const card = e.type === 'freeze' ? 'fr' : e.type === 'take3' ? 'f3' : e.type === 'sc' ? 'sc' : e.type === 'half' ? 'gh' : (e.card || 'gv');
   flyCard(e.p, e.t, card, line);
 }
 // Afspil hændelser: små effekter direkte på kort/rækker, store som overlay i kø
@@ -871,7 +891,7 @@ function playEvents(fresh, v) {
     const row = fxRow(e.p);
     const d = e.deal ? stagger++ * 140 : 0;
     if (e.type === 'card') {
-      const mod = e.card[0] === 'm' || e.card === 'x2';
+      const mod = e.card[0] === 'm' || e.card === 'x2' || e.card[0] === 'd';
       fxCard(row, e.card, mod ? 'glow' : 'dealin', d);
       if (mod) { fxFloat(row, G.label(e.card)); fxAddCls(row, 'fx-gold'); }
     } else if (e.type === 'bust') {
@@ -881,6 +901,8 @@ function playEvents(fresh, v) {
       fxAddCls(row, 'fx-stop'); fxFloat(row, 'Stopper · ' + e.pts + ' p', 'stop');
     } else if (e.type === 'freeze') {
       fxAddCls(fxRow(e.t), 'fx-ice');
+    } else if (e.type === 'half') {
+      fxAddCls(fxRow(e.t), 'fx-glow');
     } else if (e.type === 'sc' || e.type === 'save') {
       const t = e.type === 'sc' ? e.t : e.p; fxAddCls(fxRow(t), 'fx-glow');
     } else if (e.type === 'seven') {
@@ -888,7 +910,7 @@ function playEvents(fresh, v) {
     } else if (e.type === 'roundEnd') {
       const t = $('summary'); if (t) t.classList.add('fxrows');
     }
-    if (e.type === 'card' && SET.anim === 'full' && 'fr f3 sc et gv pa'.split(' ').indexOf(e.card) >= 0) fxGhost(row, e.card);
+    if (e.type === 'card' && SET.anim === 'full' && 'fr f3 sc et gv pa h2 gh'.split(' ').indexOf(e.card) >= 0) fxGhost(row, e.card);
     if (FX_BIG[e.type]) {
       if (seesOverlay(e, meIdx)) {
         const o = { e, v };
@@ -904,7 +926,8 @@ function cardHtml(c, extra) {
   let cls = 'c', inner;
   if (c[0] === 'n') { cls += ' n' + c.slice(1); inner = c.slice(1); }
   else if (c[0] === 'm' || c === 'x2') { cls += ' mod'; inner = G.label(c); }
-  else { cls += ' ' + c; inner = { fr: '❄', f3: '3', sc: '♥', et: '+', gv: '➜', pa: 'Ⅱ' }[c] + '<i>' + CARD_NAME[c].toUpperCase() + '</i>'; }
+  else if (c[0] === 'd') { cls += ' mod minus'; inner = G.label(c); }
+  else { cls += ' ' + c; inner = { fr: '❄', f3: '3', sc: '♥', et: '+', gv: '➜', pa: 'Ⅱ', h2: '÷2', gh: '÷2' }[c] + '<i>' + CARD_NAME[c].toUpperCase() + '</i>'; }
   return `<span class="${cls} ${extra || ''}" data-c="${c}">${inner}</span>`;
 }
 function handHtml(p, big) {
@@ -1027,7 +1050,11 @@ function renderLobby() {
   h += `<div class="lbl">Talkort</div><div class="seg deck" id="deckSeg">${[8,12,16].map(n => `<button type="button" data-deck="${n}" class="${max === n ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostDeck(${n})">0–${n}</button>`).join('')}</div>`;
   h += `<div class="lbl">Chance for specialkort</div><div class="seg deck" id="chanceSeg">${[['low','Lille'],['std','Standard'],['high','Høj']].map(([k, n]) => `<button type="button" data-chance="${k}" class="${ch === k ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostChance('${k}')">${n}</button>`).join('')}</div>`;
   h += `<div class="lbl">Specialkort</div><div class="specs" id="specList">${SPEC_LIST.map(([k, n]) => `<button type="button" data-spec="${k}" class="${sp[k] ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostSpec('${k}')">${n}</button>`).join('')}</div>`;
-  h += `<div class="hint" id="rulesLine">Talkort 0–${max}. Chance: ${CHANCE_NAME[ch]}. Med: ${esc(onNames)}.</div>`;
+  const mi = ['a','b','c'].indexOf(v.minus) >= 0 ? v.minus : 'off', mch = v.minusChance === 'low' || v.minusChance === 'high' ? v.minusChance : 'std';
+  h += `<div class="lbl">Minuskort</div><div class="seg deck minus" id="minusSeg">${MINUS_LIST.map(([k, n]) => `<button type="button" data-minus="${k}" class="${mi === k ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostMinus('${k}')">${n}</button>`).join('')}</div>`;
+  if (mi !== 'off') h += `<div class="lbl">Chance for minuskort</div><div class="seg deck" id="minusChanceSeg">${[['low','Lille'],['std','Standard'],['high','Høj']].map(([k, n]) => `<button type="button" data-mchance="${k}" class="${mch === k ? 'on' : ''}" ${host ? '' : 'disabled'} onclick="hostMinusChance('${k}')">${n}</button>`).join('')}</div>`;
+  h += `<div class="hint" id="rulesLine">Talkort 0–${max}. Chance: ${CHANCE_NAME[ch]}. Med: ${esc(onNames)}. Minuskort: ${mi === 'off' ? 'fra' : MINUS_LIST.find(x => x[0] === mi)[1].replace(/ /g, '/') + ' (' + CHANCE_NAME[mch] + ')'}.</div>`;
+  h += `<div class="hint">Minuskort trækkes fra rundens point efter de andre modifikatorer og kan give minus i runden. ÷2 halverer dine egne point i runden. Giv ÷2 gives til en anden aktiv spiller og halverer deres.</div>`;
   h += `<div class="hint">Ekstra træk: to kort mere med det samme. Bust på det første stopper det andet. Giv væk: giv et af dine tal til en anden (dublet = bust). Pause: springes over én gang, bliver i runden.</div>`;
   const aiN = v.players.filter(p => p.ai).length;
   const maxAi = Math.min(7, 8 - v.players.filter(p => !p.ai).length);
@@ -1076,7 +1103,7 @@ function renderGame() {
   const mid = !dense && (v.players.length >= 5 || cardsMax >= 4);
   h += `<div class="grid${dense ? ' crowded' : mid ? ' mid' : ''}" id="grid">` + v.players.map((p, i) => {
     const st = p.seven ? 'seven' : p.status;
-    return `<div class="pr${i === actor ? ' turn' : ''}${st === 'bust' ? ' is-bust' : ''}" data-p="${i}">${st === 'bust' ? '<span class="bustx">✕</span>' : ''}<span class="nm"><b>${esc(p.ai ? String(p.name).replace(/ \(AI\)$/, '') : p.name)}</b>${p.ai ? '<span class="ain"> (AI)</span>' : ''}${p.id === myId ? '<span class="dig">Dig</span>' : ''}</span><span class="pts">${G.roundScore(p)}<small>${p.total} i alt</small></span><span class="meta">${statusChip(p)}${p.skip ? '<span class="giver">over 1×</span>' : ''}${i === v.dealer ? '<span class="giver">giver</span>' : ''}${p.online ? '' : '<span class="offsmall">offline</span>'}</span><div class="sm">${handHtml(p, false)}</div></div>`;
+    return `<div class="pr${i === actor ? ' turn' : ''}${st === 'bust' ? ' is-bust' : ''}${p.status === 'stopped' && !p.seven && i !== actor ? ' is-stopped' : ''}" data-p="${i}">${st === 'bust' ? '<span class="bustx">✕</span>' : ''}<span class="nm"><b>${esc(p.ai ? String(p.name).replace(/ \(AI\)$/, '') : p.name)}</b>${p.ai ? '<span class="ain"> (AI)</span>' : ''}${p.id === myId ? '<span class="dig">Dig</span>' : ''}</span><span class="pts">${G.roundScore(p)}<small>${p.total} i alt</small></span><span class="meta">${statusChip(p)}${p.skip ? '<span class="giver">over 1×</span>' : ''}${i === v.dealer ? '<span class="giver">giver</span>' : ''}${p.online ? '' : '<span class="offsmall">offline</span>'}</span><div class="sm">${handHtml(p, false)}</div></div>`;
   }).join('') + '</div>';
   $('app').innerHTML = h;
   // knapper
@@ -1126,7 +1153,7 @@ function renderGame() {
     const order = v.players.map((p, i) => i).sort((a, b) => v.players[b].total - v.players[a].total);
     let s = `<h2>Runde ${v.round} er slut</h2>`;
     if (v.tie) s += '<p class="hint">Uafgjort i toppen – der spilles en runde mere.</p>';
-    s += '<table id="summary"><tr><th>Spiller</th><th>Runde</th><th style="text-align:right">Point</th><th style="text-align:right">Total</th></tr>' + order.map(i => { const p = v.players[i]; return `<tr><td><b>${esc(p.name)}</b><div class="sm">${handHtml(p, false)}</div></td><td>${statusChip(p)}</td><td class="n" style="color:${p.roundPts ? '#fff' : '#e0485f'}">+${p.roundPts}</td><td class="n" style="font-size:20px">${p.total}</td></tr>`; }).join('') + '</table>';
+    s += '<table id="summary"><tr><th>Spiller</th><th>Runde</th><th style="text-align:right">Point</th><th style="text-align:right">Total</th></tr>' + order.map(i => { const p = v.players[i]; return `<tr><td><b>${esc(p.name)}</b><div class="sm">${handHtml(p, false)}</div></td><td>${statusChip(p)}</td><td class="n" style="color:${p.roundPts > 0 ? '#fff' : '#e0485f'}">${p.roundPts < 0 ? '−' + (-p.roundPts) : '+' + p.roundPts}</td><td class="n" style="font-size:20px">${p.total}</td></tr>`; }).join('') + '</table>';
     if (role === 'host') s += v.phase === 'over' ? `<button class="primary" id="btnNew" onclick="hostNewGame()">Nyt spil</button>` : `<button class="primary" id="btnNext" style="height:60px;font-size:20px" onclick="hostNext()">Næste runde</button>`;
     else s += `<p class="hint" style="text-align:center">Venter på at ${esc(v.players[0].name)} ${v.phase === 'over' ? 'starter et nyt spil' : 'starter næste runde'}…</p>`;
     sh.innerHTML = s; m.classList.add('show');
